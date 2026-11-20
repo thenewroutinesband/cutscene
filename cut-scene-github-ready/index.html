@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#200526" />
+    <meta name="description" content="A small playable reveal for The New Routines — Cut Scene." />
+    <title>Cut Scene</title>
+    <style>
+      :root {
+        --ink: #220426;
+        --night: #310630;
+        --plum: #67104f;
+        --magenta: #a12872;
+        --amber: #ffae00;
+        --cream: #ffe6bf;
+        --teal: #00a79e;
+        --road: #1e0827;
+        --ui: #3f0a42;
+        --pixel: 5px;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; overflow: hidden; background: var(--ink); }
+      body {
+        color: var(--cream);
+        font-family: "Courier New", ui-monospace, monospace;
+        font-weight: 700;
+        letter-spacing: .09em;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      button { font: inherit; letter-spacing: inherit; }
+      button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+
+      .game-shell {
+        min-height: 100dvh;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        background: var(--ink);
+      }
+      .game-shell::after {
+        content: "";
+        position: absolute; inset: 0; z-index: 20; pointer-events: none; opacity: .19;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 130 130' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+        mix-blend-mode: screen;
+      }
+      .scene {
+        position: absolute; inset: 0; overflow: hidden; isolation: isolate;
+        background:
+          radial-gradient(ellipse at 15% 2%, rgba(170,45,111,.18), transparent 42%),
+          linear-gradient(#26052d 0 60%, #3b0a3b 60% 63%, var(--road) 63%);
+      }
+      .scene::before {
+        content: "";
+        position: absolute; z-index: 0; inset: -4%; pointer-events: none;
+        background: url("assets/petrol-station-still.png") center / cover no-repeat;
+        clip-path: polygon(67% 0, 100% 0, 100% 100%, 34% 100%);
+        opacity: .36;
+        mix-blend-mode: screen;
+        filter: saturate(.88) contrast(1.13);
+        transform: skewX(-4deg) scale(1.05);
+      }
+      .stars, .rain { position: absolute; z-index: 2; inset: 0; overflow: hidden; }
+      .stars::before, .stars::after {
+        content: ""; position: absolute; width: 3px; height: 3px; background: var(--teal);
+        box-shadow: 6vw 14vh var(--teal), 17vw 7vh var(--teal), 28vw 19vh var(--teal), 38vw 5vh var(--teal), 49vw 13vh var(--teal), 59vw 9vh var(--teal), 72vw 17vh var(--teal), 86vw 7vh var(--teal), 94vw 20vh var(--teal), 12vw 34vh var(--teal), 35vw 31vh var(--teal), 65vw 29vh var(--teal), 83vw 37vh var(--teal), 4vw 24vh var(--teal);
+      }
+      .stars::after { left: 42vw; top: 34vh; opacity: .45; transform: scale(.7); }
+      .rain { opacity: .78; }
+      .rain span { position: absolute; width: 5px; height: 20px; background: var(--teal); transform: skewX(-12deg); animation: rain 2.3s linear infinite; }
+      .rain span:nth-child(1){left:6%;top:27%;animation-delay:-1.7s}.rain span:nth-child(2){left:13%;top:10%;animation-delay:-.5s}.rain span:nth-child(3){left:24%;top:29%;animation-delay:-1.1s}.rain span:nth-child(4){left:32%;top:18%;animation-delay:-2s}.rain span:nth-child(5){left:44%;top:24%;animation-delay:-.2s}.rain span:nth-child(6){left:54%;top:13%;animation-delay:-1.3s}.rain span:nth-child(7){left:66%;top:26%;animation-delay:-.8s}.rain span:nth-child(8){left:76%;top:12%;animation-delay:-1.9s}.rain span:nth-child(9){left:88%;top:29%;animation-delay:-.9s}.rain span:nth-child(10){left:95%;top:8%;animation-delay:-.1s}
+      @keyframes rain { 0%,100%{transform:translateY(0) skewX(-12deg)} 50%{transform:translateY(14px) skewX(-12deg)} }
+
+      .cloud { position: absolute; z-index: 2; height: 37px; background: var(--magenta); opacity: .72; image-rendering: pixelated; clip-path: polygon(0 78%,8% 78%,8% 60%,16% 60%,16% 47%,25% 47%,25% 30%,34% 30%,34% 13%,45% 13%,45% 0,55% 0,55% 17%,66% 17%,66% 35%,75% 35%,75% 51%,91% 51%,91% 68%,100% 68%,100% 100%,0 100%); }
+      .cloud.a { left: 2%; top: 15%; width: 41%; }.cloud.b { right: 1%; top: 17%; width: 38%; transform:scaleX(-1); }
+      .skyline { position:absolute; left:-2%; right:-2%; bottom:37%; height:12%; opacity:.68; background: var(--magenta); clip-path: polygon(0 68%,4% 68%,4% 53%,7% 53%,7% 66%,10% 66%,10% 42%,13% 42%,13% 61%,16% 61%,16% 25%,20% 25%,20% 55%,24% 55%,24% 40%,28% 40%,28% 68%,32% 68%,32% 35%,36% 35%,36% 59%,41% 59%,41% 50%,45% 50%,45% 70%,51% 70%,51% 34%,55% 34%,55% 54%,61% 54%,61% 41%,65% 41%,65% 69%,70% 69%,70% 30%,75% 30%,75% 55%,79% 55%,79% 42%,84% 42%,84% 68%,90% 68%,90% 36%,93% 36%,93% 62%,100% 62%,100% 100%,0 100%); }
+
+      .station { position:absolute; z-index:3; left:31%; bottom:28%; width:37%; height:30%; min-width:320px; }
+      .canopy { position:absolute; left:0; top:0; width:100%; height:16%; background:var(--amber); border-bottom:5px solid #8b254b; box-shadow:0 4px 0 #651343; }
+      .canopy::after { content:""; position:absolute; left:10%; top:100%; width:4%; height:170%; background:var(--amber); box-shadow: calc(22.5 * var(--pixel)) 0 var(--amber); }
+      .shop { position:absolute; right:-7%; bottom:0; width:42%; height:58%; background:var(--plum); border-top:6px solid var(--amber); box-shadow: inset 0 -5px #3e0b3d; }
+      .shop-window { position:absolute; top:27%; left:14%; width:54%; height:43%; border:6px solid var(--teal); background:#27052d; }
+      .shop-window::before { content:""; position:absolute; left:12%; right:12%; bottom:13%; height:18%; background:var(--teal); box-shadow:12px -13px 0 -2px var(--teal), 28px -5px 0 -3px var(--teal), 42px -21px 0 -2px var(--teal); }
+      .door { position:absolute; right:9%; bottom:9%; height:67%; width:23%; border:5px solid var(--amber); background:#29052d; }
+      .door::after { content:""; position:absolute; width:8px; height:8px; right:10%; top:48%; background:var(--amber); }
+      .pump { position:absolute; bottom:0; width:13%; height:46%; background:var(--amber); border:5px solid #80234a; }
+      .pump.one { left:17%; }.pump.two { left:50%; }
+      .pump::before { content:""; position:absolute; left:16%; right:16%; top:11%; height:26%; background:#2c0940; border:4px solid var(--amber); box-shadow:inset 0 0 0 4px var(--teal); }
+      .pump::after { content:""; position:absolute; right:-32%; top:36%; width:36%; height:42%; border:5px solid var(--amber); border-left:0; border-bottom-right-radius:16px; }
+      .bollard { position:absolute; bottom:0; height:30%; width:4%; background:var(--amber); border:4px solid #762043; }.bollard.a{left:7%}.bollard.b{right:-1%}
+      .ground { position:absolute; left:0; right:0; bottom:26%; height:4%; background:#7a1c54; border-bottom:5px solid #26042d; }
+      .road-lines { position:absolute; z-index:2; left:0; bottom:12%; right:0; height:14px; background:repeating-linear-gradient(90deg, transparent 0 3.5%, var(--amber) 3.5% 9.5%, transparent 9.5% 17%); }
+      .puddle { position:absolute; z-index:1; bottom:15%; width:10%; height:12px; background:var(--teal); opacity:.78; clip-path:polygon(0 49%,14% 49%,14% 20%,47% 20%,47% 0,69% 0,69% 32%,100% 32%,100% 69%,84% 69%,84% 100%,16% 100%,16% 72%,0 72%); }.puddle.a{left:7%}.puddle.b{right:9%}
+
+      .bin-wrap { position:absolute; z-index:6; left:76%; bottom:28.8%; width:70px; height:100px; transition:filter .2s; }
+      .bin { position:absolute; bottom:0; left:9px; width:48px; height:66px; background:#0c746f; border:5px solid #063f48; box-shadow:7px 6px 0 #5e1346; }
+      .bin::before { content:""; position:absolute; left:-7px; top:-13px; width:52px; height:13px; border:5px solid #063f48; background:var(--teal); transform:skewX(-12deg); }
+      .bin::after { content:""; position:absolute; left:7px; top:15px; right:7px; height:4px; background:#0a4f55; box-shadow:0 10px #0a4f55,0 20px #0a4f55; }
+      .bin-wrap.ready .bin { animation:bin-wiggle .75s steps(2,end) infinite; filter:drop-shadow(0 0 8px var(--amber)); }.bin-wrap.rummage { animation: bin-hop .6s steps(2,end) 7; }
+      @keyframes bin-wiggle{50%{transform:translateX(3px)}}@keyframes bin-hop{50%{transform:translateY(-5px) rotate(2deg)}}
+
+      .fox { --fox-x: 14%; position:absolute; z-index:8; bottom:27.5%; left:var(--fox-x); width:78px; height:100px; transform:translateX(-50%); transition:left .04s linear; }
+      .fox .tail { position:absolute; left:-14px; bottom:7px; width:44px; height:36px; background:var(--amber); clip-path:polygon(0 42%,26% 13%,65% 0,100% 27%,83% 68%,100% 79%,77% 100%,30% 79%); }.fox .tail::after{content:"";position:absolute;width:16px;height:22px;right:0;bottom:0;background:var(--cream);clip-path:polygon(30% 0,100% 40%,63% 100%,0 84%)}
+      .fox .body { position:absolute; bottom:0; left:24px; width:34px; height:41px; background:#772050; border:4px solid #28062e; box-shadow: 6px 0 0 #49103e; }.fox .body::after{content:"";position:absolute;bottom:-3px;left:-3px;width:12px;height:17px;background:var(--amber);box-shadow:23px 0 var(--amber)}
+      .fox .head { position:absolute; left:17px; bottom:34px; width:44px; height:43px; background:var(--amber); clip-path:polygon(1% 21%,16% 21%,16% 0,32% 17%,64% 17%,86% 0,88% 26%,100% 28%,100% 74%,78% 100%,19% 92%,0 71%); }.fox .head::before{content:"";position:absolute;left:7px;top:20px;width:5px;height:5px;background:#2c0630;box-shadow:23px 0 #2c0630}.fox .head::after{content:"";position:absolute;right:-1px;bottom:4px;width:20px;height:13px;background:var(--cream);clip-path:polygon(0 0,100% 29%,71% 100%,0 85%)}
+      .fox.walk .body { animation:walk .28s steps(2,end) infinite; }.fox.walk .tail { animation:tail .28s steps(2,end) infinite; }.fox.rummaging { left:74%!important; }.fox.rummaging .head { animation:dip .55s steps(2,end) 7; }.fox.rummaging .body{animation:none}.fox.rummaging .tail{animation:tail .25s steps(2,end) 16}
+      @keyframes walk{50%{transform:translateY(3px)}}@keyframes tail{50%{transform:rotate(-8deg)}}@keyframes dip{50%{transform:translate(20px,18px) rotate(16deg)}}
+      .crumb { position:absolute; z-index:11; left:77%; bottom:44%; width:9px; height:9px; background:var(--cream); opacity:0; }.rummaging ~ .crumb { animation:crumb 1s steps(3,end) 3; } @keyframes crumb{20%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(-20px,-30px)}}
+
+      .hud { position:absolute; z-index:31; inset:0; pointer-events:none; padding:max(18px, env(safe-area-inset-top)) 20px 20px; display:flex; align-items:flex-start; justify-content:space-between; }
+      .brand, .task { font-size:clamp(10px,1.5vw,14px); text-shadow:2px 2px 0 #611447; }
+      .task { color:var(--amber); text-align:right; max-width:42%; line-height:1.45; }
+      .heart-bar { margin-top:9px; height:7px; width:110px; background:repeating-linear-gradient(90deg,var(--teal) 0 12px,transparent 12px 17px); }
+      .sound { pointer-events:auto; position:absolute; left:20px; top:54px; min-height:27px; padding:5px 8px; border:2px solid var(--teal); color:var(--cream); background:rgba(39,5,45,.82); box-shadow:3px 3px 0 #16021c; cursor:pointer; font-size:10px; }
+      .sound[aria-pressed="false"] { border-color:#6f275c; color:#cfa2bf; }
+      .prompt { position:absolute; z-index:30; left:50%; top:15%; transform:translateX(-50%); padding:9px 13px; min-width:max-content; color:var(--cream); background:var(--ui); border:3px solid var(--amber); box-shadow:5px 5px 0 #17031d; font-size:clamp(10px,1.6vw,15px); opacity:0; transition:opacity .25s, transform .25s; pointer-events:none; }
+      .prompt.show { opacity:1; transform:translateX(-50%) translateY(0); }.prompt::after { content:""; position:absolute; left:50%; bottom:-11px; width:0; height:0; border-left:8px solid transparent; border-right:8px solid transparent; border-top:9px solid var(--amber); transform:translateX(-50%); }
+
+      .controls { position:absolute; z-index:35; left:max(18px, env(safe-area-inset-left)); right:max(18px, env(safe-area-inset-right)); bottom:max(18px, env(safe-area-inset-bottom)); display:flex; justify-content:space-between; align-items:end; }
+      .dpad { position:relative; width:144px; height:96px; }
+      .control, .action { border:0; color:var(--cream); cursor:pointer; user-select:none; -webkit-user-select:none; }
+      .control { position:absolute; top:24px; width:48px; height:48px; background:var(--ui); border:4px solid #7b215c; box-shadow:inset 0 0 0 3px #27052f, 3px 3px 0 #130219; }
+      .control:active, .control.active { background:var(--magenta); transform:translate(2px,2px); box-shadow:inset 0 0 0 3px #27052f; }.left{left:0}.right{right:0}.center{left:48px;background:#551146;pointer-events:none}.control span{font-size:22px;line-height:1}
+      .action { min-width:100px; min-height:62px; padding:11px 14px; background:var(--amber); border:5px solid #be5e18; box-shadow:5px 5px 0 #21032a; color:#2c0630; font-size:12px; line-height:1.1; }.action[disabled]{opacity:.35;cursor:not-allowed;filter:grayscale(.8)}.action.pulse:not([disabled]){animation:pulse .8s steps(2,end) infinite}@keyframes pulse{50%{transform:translateY(-4px);box-shadow:5px 9px 0 #21032a}}
+      .intro { position:absolute; z-index:40; inset:0; display:grid; place-items:center; background:linear-gradient(rgba(27,3,32,.52),rgba(27,3,32,.75)),url("assets/petrol-station-still.png") center / cover no-repeat; transition:opacity .35s,visibility .35s; }.intro.hidden{opacity:0;visibility:hidden}.intro-card { text-align:center; width:min(88vw,420px); padding:20px; background:rgba(50,6,49,.89); border:5px solid var(--amber); box-shadow:9px 9px 0 #120118; }.intro-card h1{margin:0 0 11px;font-size:clamp(24px,5vw,42px);color:var(--amber);text-shadow:4px 4px 0 #6b154e}.intro-card p{font-size:13px;line-height:1.7;margin:0 0 18px}.start{border:4px solid #be5e18;background:var(--amber);padding:13px 22px;color:#2c0630;cursor:pointer;font:inherit;font-size:14px;box-shadow:4px 4px 0 #18021e}.start:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #18021e}
+      .continue { position:absolute; z-index:37; left:50%; top:50%; transform:translate(-50%,-50%) scale(.7); opacity:0; visibility:hidden; color:#2a0630; background:var(--amber); border:5px solid #be5e18; box-shadow:7px 7px 0 #18021f; padding:15px 20px; cursor:pointer; transition:opacity .25s,transform .25s,visibility .25s; }.continue.show{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+
+      .reveal { position:absolute; z-index:70; inset:0; display:grid; place-items:center; padding:24px; background:#220426; opacity:0; visibility:hidden; transition:opacity .55s,visibility .55s; }.reveal.show{opacity:1;visibility:visible}.reveal::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 19px,rgba(161,40,114,.12) 19px 20px),repeating-linear-gradient(0deg,transparent 0 19px,rgba(0,167,158,.09) 19px 20px);transform:perspective(420px) rotateX(63deg) translateY(23%);transform-origin:bottom;}.date{position:relative;color:var(--amber);font-size:clamp(31px,8.5vw,108px);line-height:.9;text-align:center;text-shadow:6px 6px 0 #68184f,12px 12px 0 #0d6669;letter-spacing:.035em;animation:date-in .65s steps(5,end) both}@keyframes date-in{from{opacity:0;transform:scale(1.6)}to{opacity:1;transform:scale(1)}}
+      .hub-return { position:absolute; z-index:2; left:50%; bottom:max(28px, env(safe-area-inset-bottom)); transform:translateX(-50%); min-width:160px; padding:12px 16px; border:4px solid #be5e18; background:var(--amber); box-shadow:5px 5px 0 #18021f; color:#2a0630; cursor:pointer; font-size:12px; }
+
+      .master-screen { position:absolute; z-index:90; inset:0; display:grid; place-items:center; overflow:hidden; padding:24px; background:#210426; }
+      .master-screen[hidden] { display:none; }
+      .opening { background:linear-gradient(rgba(23,2,28,.34),rgba(23,2,28,.74)),url("assets/petrol-station-still.png") center / cover no-repeat; }
+      .opening::before { content:""; position:absolute; inset:50% -30% -30%; background:repeating-linear-gradient(90deg,transparent 0 10%,rgba(255,174,0,.8) 10% 17%,transparent 17% 31%); transform:perspective(340px) rotateX(62deg); transform-origin:top; opacity:.65; animation:road-drift 1.4s linear infinite; }
+      .opening::after { content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(0,167,158,.16),transparent 34%,transparent 66%,rgba(161,40,114,.24)),radial-gradient(ellipse at 50% 10%,transparent 20%,rgba(34,4,38,.66) 100%); }
+      .opening-card { position:relative; z-index:2; width:min(92vw,440px); padding:25px 20px 21px; text-align:center; background:rgba(38,5,44,.88); border:5px solid var(--amber); box-shadow:9px 9px 0 #14021b; }
+      .opening-card::before { content:"THE NEW ROUTINES"; display:block; margin-bottom:20px; color:var(--teal); font-size:11px; letter-spacing:.16em; }
+      .opening-card h1 { margin:0 0 24px; color:var(--amber); font-size:clamp(29px,7vw,52px); line-height:.9; text-shadow:5px 5px 0 #6b154e; }
+      .drive-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+      .drive-choice { min-height:58px; border:4px solid #7b215c; color:var(--cream); background:#3f0a42; box-shadow:4px 4px 0 #15021d; cursor:pointer; font-size:15px; }
+      .drive-choice.primary { background:var(--amber); border-color:#be5e18; color:#2d0630; }
+      .drive-choice:active { transform:translate(2px,2px); box-shadow:2px 2px 0 #15021d; }
+      .drive-status { min-height:16px; margin:16px 0 0; color:var(--teal); font-size:10px; line-height:1.4; }
+      .opening.driving .opening-card { animation:drive-shake .24s steps(2,end) 7; }.opening.driving::before { animation-duration:.22s; }
+      @keyframes road-drift { to { background-position:36vw 0; } } @keyframes drive-shake { 50% { transform:translate(4px,-2px); } }
+
+      .level-select { align-content:center; background:linear-gradient(rgba(28,3,35,.68),rgba(28,3,35,.9)),url("assets/petrol-station-still.png") center / cover no-repeat; }
+      .level-shell { position:relative; z-index:2; width:min(94vw,610px); border:5px solid var(--amber); background:#2d0734; box-shadow:10px 10px 0 #14021b; }
+      .level-top { padding:18px 18px 14px; min-height:100px; border-bottom:5px solid #711950; background:linear-gradient(135deg,rgba(0,167,158,.18),transparent 56%),#34083b; }
+      .level-kicker { margin:0 0 9px; color:var(--teal); font-size:10px; }.level-top h2 { margin:0; color:var(--amber); font-size:clamp(20px,4.8vw,34px); line-height:1; text-shadow:3px 3px 0 #6b154e; }
+      .level-bottom { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px; background:#22052c; }
+      .level-card { min-height:96px; padding:10px; border:3px solid #7b215c; color:var(--cream); background:#430c48; text-align:left; cursor:pointer; box-shadow:3px 3px 0 #15021d; }
+      .level-card:not([disabled]):hover, .level-card:not([disabled]):focus-visible { border-color:var(--amber); background:#5a114e; }
+      .level-card:not([disabled]):active { transform:translate(2px,2px); box-shadow:1px 1px 0 #15021d; }
+      .level-card span, .level-card b, .level-card em { display:block; }.level-card span { color:var(--teal); font-size:11px; }.level-card b { margin:6px 0; color:var(--cream); font-size:12px; line-height:1.25; }.level-card em { color:var(--amber); font-style:normal; font-size:10px; }
+      .level-card.locked { opacity:.64; cursor:not-allowed; filter:grayscale(.26); }.level-card.locked em { color:#d18aae; }.level-card.complete { border-color:var(--teal); }
+      .level-note { grid-column:1 / -1; margin:6px 2px 0; color:#d3a1bd; font-size:10px; line-height:1.45; text-align:center; }
+
+      @media (max-width: 650px) { .scene::before{opacity:.43;clip-path:polygon(72% 0,100% 0,100% 100%,27% 100%)}.station {left:21%;width:58%;bottom:32%;transform:scale(.83);transform-origin:bottom left}.cloud.a{width:65%}.cloud.b{width:58%;top:20%}.ground{bottom:30%}.road-lines{bottom:14%}.puddle{bottom:18%}.fox{bottom:31.5%;transform:translateX(-50%) scale(.82);transform-origin:bottom}.bin-wrap{bottom:32.3%;left:73%;transform:scale(.8);transform-origin:bottom}.controls{bottom:max(15px,env(safe-area-inset-bottom))}.hud{padding-left:15px;padding-right:15px}.brand{max-width:43%;line-height:1.45}.task{font-size:10px}.sound{left:15px;top:55px}.prompt{top:13%;font-size:10px}.intro-card{padding:18px}.intro-card p{font-size:12px}.date{font-size:clamp(36px,12vw,68px)}.opening-card{padding:22px 16px 18px}.level-shell{width:min(94vw,460px)}.level-card{min-height:88px;padding:9px}.level-card b{font-size:11px}.hub-return{bottom:max(20px,env(safe-area-inset-bottom))} }
+      @media (max-height: 500px) and (orientation: landscape) {.station{bottom:22%;transform:scale(.75);transform-origin:bottom left}.ground{bottom:20%}.road-lines{bottom:8%}.puddle{bottom:11%}.fox{bottom:21%;transform:translateX(-50%) scale(.72);transform-origin:bottom}.bin-wrap{bottom:22%;transform:scale(.72);transform-origin:bottom}.controls{bottom:9px}.hud{padding-top:10px}.prompt{top:12%}.dpad{transform:scale(.8);transform-origin:bottom left}.action{transform:scale(.8);transform-origin:bottom right}.intro-card{padding:12px}.intro-card h1{font-size:25px}.intro-card p{margin-bottom:10px;font-size:11px}.start{padding:9px 15px}}
+      @media (prefers-reduced-motion: reduce) { *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;scroll-behavior:auto!important} }
+    </style>
+  </head>
+  <body>
+    <main class="game-shell" aria-label="Cut Scene playable reveal">
+      <section class="scene" id="scene" aria-label="A rainy pixel-art petrol station at night">
+        <div class="stars"></div><div class="rain" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="cloud a"></div><div class="cloud b"></div><div class="skyline"></div>
+        <div class="station" aria-hidden="true"><div class="canopy"></div><div class="shop"><div class="shop-window"></div><div class="door"></div></div><div class="pump one"></div><div class="pump two"></div><div class="bollard a"></div><div class="bollard b"></div></div>
+        <div class="ground"></div><div class="puddle a"></div><div class="puddle b"></div><div class="road-lines"></div>
+        <div class="bin-wrap" id="bin" aria-hidden="true"><div class="bin"></div></div>
+        <div class="fox" id="fox" role="img" aria-label="A fox"><div class="tail"></div><div class="body"></div><div class="head"></div></div><i class="crumb" aria-hidden="true"></i>
+      </section>
+      <div class="hud" id="hud" aria-live="polite" hidden><div class="brand">THE NEW ROUTINES<div class="heart-bar"></div></div><div class="task" id="task">WALK PAST THE PETROL STATION</div><button class="sound" id="sound" type="button" aria-pressed="true" aria-label="Turn sound off">SOUND: ON</button></div>
+      <div class="prompt" id="prompt" hidden>BIN FOUND — PRESS A</div>
+      <div class="controls" id="controls" aria-label="Game controls" hidden>
+        <div class="dpad" aria-label="Movement controls"><button class="control left" type="button" data-direction="left" aria-label="Move left"><span>◀</span></button><button class="control center" type="button" aria-hidden="true"><span>+</span></button><button class="control right" type="button" data-direction="right" aria-label="Move right"><span>▶</span></button></div>
+        <button class="action" type="button" id="action" disabled aria-label="Scavenge in the bin">A<br>SCAVENGE</button>
+      </div>
+      <section class="intro" id="intro" aria-label="Game instructions" hidden><div class="intro-card"><h1>CUT SCENE</h1><p>MOVE WITH THE ARROW KEYS<br>OR THE D-PAD. FIND SOMETHING TO EAT.</p><button class="start" id="start" type="button">PLAY</button></div></section>
+      <button class="continue" id="continue" type="button" aria-hidden="true">CONTINUE</button>
+      <section class="reveal" id="reveal" aria-label="Release date" aria-hidden="true"><div class="date">15 JANUARY<br>2027</div><button class="hub-return" id="hubReturn" type="button">CONTINUE</button></section>
+      <section class="master-screen opening" id="opening" aria-label="Opening choice">
+        <div class="opening-card">
+          <h1>KEEP<br>DRIVING?</h1>
+          <div class="drive-choices"><button class="drive-choice" id="driveNo" type="button">NO</button><button class="drive-choice primary" id="driveYes" type="button">YES</button></div>
+          <p class="drive-status" id="driveStatus" aria-live="polite"></p>
+        </div>
+      </section>
+      <section class="master-screen level-select" id="levelSelect" aria-label="Cutscene level select" hidden>
+        <div class="level-shell">
+          <div class="level-top"><p class="level-kicker">CUTSCENE // PLAY A LEVEL</p><h2>THE NEW ROUTINES</h2></div>
+          <div class="level-bottom">
+            <button class="level-card" id="playLevelOne" type="button"><span>01</span><b>THE PETROL STATION</b><em id="levelOneState">PLAY</em></button>
+            <button class="level-card locked" type="button" disabled><span>02</span><b>THE STORM FIELD</b><em>LOCKED</em></button>
+            <button class="level-card locked" type="button" disabled><span>03</span><b>COLD ON THE OFFBEAT</b><em>LOCKED</em></button>
+            <button class="level-card locked" type="button" disabled><span>04</span><b>WHO DO YOU LOVE?</b><em>LOCKED</em></button>
+            <p class="level-note">COMPLETE EACH CUTSCENE TO UNLOCK THE NEXT.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <audio id="music" loop preload="metadata" src="assets/cut-scene-remix.mp3"></audio>
+    <script>
+      (() => {
+        const fox = document.getElementById('fox');
+        const bin = document.getElementById('bin');
+        const prompt = document.getElementById('prompt');
+        const task = document.getElementById('task');
+        const action = document.getElementById('action');
+        const intro = document.getElementById('intro');
+        const start = document.getElementById('start');
+        const hud = document.getElementById('hud');
+        const controls = document.getElementById('controls');
+        const continueButton = document.getElementById('continue');
+        const reveal = document.getElementById('reveal');
+        const hubReturn = document.getElementById('hubReturn');
+        const opening = document.getElementById('opening');
+        const levelSelect = document.getElementById('levelSelect');
+        const driveNo = document.getElementById('driveNo');
+        const driveYes = document.getElementById('driveYes');
+        const driveStatus = document.getElementById('driveStatus');
+        const playLevelOne = document.getElementById('playLevelOne');
+        const levelOneState = document.getElementById('levelOneState');
+        const music = document.getElementById('music');
+        const soundToggle = document.getElementById('sound');
+        let x = 14;
+        let direction = 0;
+        let playing = false;
+        let canScavenge = false;
+        let rummaging = false;
+        let timer;
+        let soundOn = true;
+        let audioCtx;
+        let masterGain;
+        let rainSource;
+        let lastStepAt = 0;
+        let resumeAudioOnReturn = false;
+        let activeScreen = 'opening';
+        let levelOneComplete = false;
+
+        try { levelOneComplete = localStorage.getItem('cutscene-level-one') === 'complete'; } catch (_) {}
+
+        function setupAudio() {
+          if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            audioCtx = new AudioContext();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = .72;
+            masterGain.connect(audioCtx.destination);
+
+            const rainBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 3, audioCtx.sampleRate);
+            const rainData = rainBuffer.getChannelData(0);
+            for (let index = 0; index < rainData.length; index += 1) rainData[index] = Math.random() * 2 - 1;
+            rainSource = audioCtx.createBufferSource();
+            rainSource.buffer = rainBuffer;
+            rainSource.loop = true;
+            const rainFilter = audioCtx.createBiquadFilter();
+            rainFilter.type = 'lowpass';
+            rainFilter.frequency.value = 1700;
+            const rainGain = audioCtx.createGain();
+            rainGain.gain.value = .032;
+            rainSource.connect(rainFilter).connect(rainGain).connect(masterGain);
+            rainSource.start();
+          }
+          if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        }
+
+        function noiseBurst(duration, frequency, volume) {
+          if (!audioCtx || !soundOn) return;
+          const now = audioCtx.currentTime;
+          const sampleCount = Math.max(1, Math.ceil(audioCtx.sampleRate * duration));
+          const buffer = audioCtx.createBuffer(1, sampleCount, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let index = 0; index < sampleCount; index += 1) data[index] = (Math.random() * 2 - 1) * (1 - index / sampleCount);
+          const source = audioCtx.createBufferSource();
+          const filter = audioCtx.createBiquadFilter();
+          const gain = audioCtx.createGain();
+          source.buffer = buffer;
+          filter.type = 'bandpass';
+          filter.frequency.value = frequency;
+          filter.Q.value = .65;
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(volume, now + .012);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + duration);
+          source.connect(filter).connect(gain).connect(masterGain);
+          source.start(now);
+          source.stop(now + duration + .03);
+        }
+
+        function footstep() {
+          if (!audioCtx || !soundOn) return;
+          const now = audioCtx.currentTime;
+          const oscillator = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          oscillator.type = 'triangle';
+          oscillator.frequency.setValueAtTime(128, now);
+          oscillator.frequency.exponentialRampToValueAtTime(66, now + .1);
+          gain.gain.setValueAtTime(.0001, now);
+          gain.gain.exponentialRampToValueAtTime(.037, now + .008);
+          gain.gain.exponentialRampToValueAtTime(.0001, now + .115);
+          oscillator.connect(gain).connect(masterGain);
+          oscillator.start(now);
+          oscillator.stop(now + .12);
+          noiseBurst(.09, 520, .018);
+        }
+
+        function rustle() {
+          noiseBurst(.28 + Math.random() * .14, 680 + Math.random() * 460, .075);
+        }
+
+        function updateSoundControl() {
+          soundToggle.textContent = `SOUND: ${soundOn ? 'ON' : 'OFF'}`;
+          soundToggle.setAttribute('aria-pressed', String(soundOn));
+          soundToggle.setAttribute('aria-label', `Turn sound ${soundOn ? 'off' : 'on'}`);
+        }
+
+        function setSound(next) {
+          soundOn = next;
+          updateSoundControl();
+          if (masterGain && audioCtx) {
+            masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+            masterGain.gain.setTargetAtTime(soundOn ? .72 : .0001, audioCtx.currentTime, .025);
+          }
+          if (!soundOn) {
+            music.pause();
+          } else if (playing) {
+            setupAudio();
+            music.play().catch(() => {});
+          }
+        }
+
+        function startAudio() {
+          if (!soundOn) return;
+          setupAudio();
+          music.volume = .38;
+          music.play().catch(() => {});
+        }
+
+        function focusSoon(element) {
+          window.setTimeout(() => element.focus(), 80);
+        }
+
+        function setGameChrome(visible) {
+          hud.hidden = !visible;
+          controls.hidden = !visible;
+          prompt.hidden = !visible;
+          if (!visible) prompt.classList.remove('show');
+        }
+
+        function updateLevelOneCard() {
+          playLevelOne.classList.toggle('complete', levelOneComplete);
+          levelOneState.textContent = levelOneComplete ? 'COMPLETE / REPLAY' : 'PLAY';
+        }
+
+        function resetLevelOne() {
+          x = 14;
+          direction = 0;
+          playing = false;
+          canScavenge = false;
+          rummaging = false;
+          lastStepAt = 0;
+          fox.className = 'fox';
+          bin.className = 'bin-wrap';
+          continueButton.classList.remove('show');
+          continueButton.setAttribute('aria-hidden', 'true');
+          reveal.classList.remove('show');
+          reveal.setAttribute('aria-hidden', 'true');
+          intro.classList.remove('hidden');
+          paint();
+        }
+
+        function showLevelSelect() {
+          activeScreen = 'select';
+          direction = 0;
+          playing = false;
+          opening.hidden = true;
+          levelSelect.hidden = false;
+          setGameChrome(false);
+          intro.hidden = true;
+          continueButton.classList.remove('show');
+          continueButton.setAttribute('aria-hidden', 'true');
+          reveal.classList.remove('show');
+          reveal.setAttribute('aria-hidden', 'true');
+          updateLevelOneCard();
+          focusSoon(playLevelOne);
+        }
+
+        function startLevelOne() {
+          activeScreen = 'level-one';
+          levelSelect.hidden = true;
+          opening.hidden = true;
+          resetLevelOne();
+          setGameChrome(true);
+          intro.hidden = false;
+          focusSoon(start);
+        }
+
+        function completeLevelOne() {
+          levelOneComplete = true;
+          try { localStorage.setItem('cutscene-level-one', 'complete'); } catch (_) {}
+          updateLevelOneCard();
+        }
+
+        function paint() {
+          fox.style.setProperty('--fox-x', `${x}%`);
+          const close = x >= 69 && x <= 81;
+          if (close && !rummaging) {
+            canScavenge = true;
+            bin.classList.add('ready');
+            prompt.classList.add('show');
+            action.disabled = false;
+            action.classList.add('pulse');
+            task.textContent = 'RUMMAGE FOR FOOD';
+          } else if (!rummaging) {
+            canScavenge = false;
+            bin.classList.remove('ready');
+            prompt.classList.remove('show');
+            action.disabled = true;
+            action.classList.remove('pulse');
+            task.textContent = x < 69 ? 'WALK PAST THE PETROL STATION' : 'GO BACK TO THE BIN';
+          }
+        }
+        function tick() {
+          if (playing && direction && !rummaging) {
+            x = Math.max(8, Math.min(89, x + direction * .17));
+            fox.classList.toggle('walk', Boolean(direction));
+            const now = performance.now();
+            if (now - lastStepAt > 280) {
+              footstep();
+              lastStepAt = now;
+            }
+            paint();
+          } else {
+            fox.classList.remove('walk');
+          }
+          timer = requestAnimationFrame(tick);
+        }
+        function setDirection(next) { if (playing && !rummaging) direction = next; }
+        function startGame() {
+          if (activeScreen !== 'level-one') return;
+          playing = true;
+          intro.classList.add('hidden');
+          document.body.focus();
+          startAudio();
+          if (!timer) tick();
+        }
+        function scavenge() {
+          if (!canScavenge || rummaging) return;
+          rummaging = true;
+          direction = 0;
+          task.textContent = 'EATING...';
+          prompt.classList.remove('show');
+          action.disabled = true;
+          action.classList.remove('pulse');
+          bin.classList.remove('ready');
+          bin.classList.add('rummage');
+          fox.classList.add('rummaging');
+          [0, 360, 810, 1320, 1880, 2470, 3040, 3590].forEach(delay => setTimeout(rustle, delay));
+          setTimeout(() => {
+            fox.classList.remove('rummaging');
+            bin.classList.remove('rummage');
+            task.textContent = 'FOUND SOMETHING';
+            continueButton.classList.add('show');
+            continueButton.setAttribute('aria-hidden', 'false');
+          }, 4200);
+        }
+        document.querySelectorAll('[data-direction]').forEach(button => {
+          const value = button.dataset.direction === 'left' ? -1 : 1;
+          const down = event => { event.preventDefault(); setDirection(value); button.classList.add('active'); };
+          const up = event => { event.preventDefault(); if (direction === value) direction = 0; button.classList.remove('active'); };
+          button.addEventListener('pointerdown', down);
+          ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => button.addEventListener(type, up));
+          button.addEventListener('click', () => { if (playing && !rummaging) { x = Math.max(8, Math.min(89, x + value * 2)); paint(); } });
+        });
+        window.addEventListener('keydown', event => {
+          const key = event.key.toLowerCase();
+          if (activeScreen !== 'level-one') return;
+          if (['arrowleft','arrowright','a','d',' ','enter'].includes(key)) event.preventDefault();
+          if (!playing && (key === ' ' || key === 'enter')) startGame();
+          if (key === 'arrowleft' || key === 'a') setDirection(-1);
+          if (key === 'arrowright' || key === 'd') setDirection(1);
+          if ((key === ' ' || key === 'enter') && canScavenge) scavenge();
+        });
+        window.addEventListener('keyup', event => { if (['arrowleft','a','arrowright','d'].includes(event.key.toLowerCase())) direction = 0; });
+        start.addEventListener('click', startGame);
+        action.addEventListener('click', scavenge);
+        soundToggle.addEventListener('click', () => setSound(!soundOn));
+        continueButton.addEventListener('click', () => {
+          controls.hidden = true;
+          prompt.hidden = true;
+          continueButton.classList.remove('show');
+          continueButton.setAttribute('aria-hidden', 'true');
+          hud.hidden = true;
+          completeLevelOne();
+          reveal.setAttribute('aria-hidden', 'false');
+          reveal.classList.add('show');
+          focusSoon(hubReturn);
+        });
+        hubReturn.addEventListener('click', showLevelSelect);
+        driveYes.addEventListener('click', () => {
+          startAudio();
+          showLevelSelect();
+        });
+        driveNo.addEventListener('click', () => {
+          driveYes.disabled = true;
+          driveNo.disabled = true;
+          driveStatus.textContent = 'JUST A LITTLE LONGER...';
+          opening.classList.add('driving');
+          window.setTimeout(() => {
+            opening.classList.remove('driving');
+            driveStatus.textContent = '';
+            driveYes.disabled = false;
+            driveNo.disabled = false;
+            driveNo.focus();
+          }, 1650);
+        });
+        playLevelOne.addEventListener('click', startLevelOne);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            resumeAudioOnReturn = soundOn && !music.paused;
+            music.pause();
+            if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+          } else if (resumeAudioOnReturn && soundOn) {
+            setupAudio();
+            music.play().catch(() => {});
+            resumeAudioOnReturn = false;
+          }
+        });
+        updateLevelOneCard();
+        paint();
+      })();
+    </script>
+  </body>
+</html>
