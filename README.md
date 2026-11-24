@@ -1,46 +1,48 @@
-# Cut Scene — Levels 1 + 2 (Field Maze)
+# Cut Scene — Levels 1, 2 + 3
 
 This is the GitHub Pages build for The New Routines' *Cut Scene*.
 
-## What is deliberately unchanged
+## What remains unchanged
 
-`index.html`, Level 1, the opening screen, Level 1 controls, Level 1 music and Level 1 visual UI start from the approved `CS - V3 - Final` source. The only Level 1 menu change is the existing **02 / THE STORM FIELD** card: it unlocks once Level 1 is completed and opens `level2.html`.
+Level 1, Level 2, their visual design, their gameplay, their existing sound files, and their existing asset folders are preserved. Level 3 is a separate page and its files live only in `assets/level3/`.
 
-## Level 2
+## Level flow
 
-- A top-down, rain-soaked field maze with subtle dirt paths rather than a bright visible grid, extra gentle branches, and forgiving dead ends.
-- A picket-fence field boundary frames the maze without blocking any playable cells.
-- The fox begins in the bottom-left. After **START RUN**, the objective remains visible for three seconds, followed by a clear 3–2–1 countdown; the fox then heads north and keeps moving until directed elsewhere.
-- Four-way D-pad plus Arrow keys/WASD. A blocked direction makes the fox wait for a new direction.
-- Frankie is a friendly combine harvester who follows the same valid paths, slightly more slowly than the fox. The movement animation is smooth, and there is no floating name tag above the combine.
-- Five hearts = five attempts. A catch plays a light failure cue, removes one heart, and restarts after a fresh countdown. At zero hearts the game returns to the level-selection screen.
-- The maze is kept completely clear of the title, sound button, health display, and objective on both phone and desktop. Those controls sit outside the playable grid.
-- A large glowing shelter, with a lit doorway and a **SHELTER** marker, makes the goal in the top-right clear. Reaching it completes the level, shows the lyric, then unlocks the **PRE-SAVE CUTSCENE** reward screen.
-- The supplied Level 2 clip plays only during Level 2 gameplay, loops while running, and restarts from the beginning after a catch.
+1. **01 / THE PETROL STATION** is the original approved level.
+2. **02 / THE STORM FIELD** unlocks after Level 1.
+3. **03 / WHO DO YOU LOVE?** unlocks after Level 2 and opens `level3.html`.
+4. **04 / THIS SUCKER IS NUCLEAR!** remains locked. It is not unlocked by completing Level 3, because future levels will be released on their own calendar schedule.
+
+## Level 3 — Who Do You Love?
+
+- A portrait-first, faux-isometric concert venue where the fox travels from the rear of a packed crowd to the female fox at the stage barrier.
+- The venue keeps the established dark purple, magenta, amber and teal *Cut Scene* look. The final concert reference informs the stage, audience density, lighting and four-member band layout.
+- Eight fair crowd rows alternate between stationary people and slow moving people. The crowd has generous gaps and multiple routes so the level remains approachable on a phone.
+- Arrow keys, WASD and the four-way D-pad move the fox one grid space at a time. Higher rows sit further back in the concert perspective, while the controls remain intuitive: up is towards the stage.
+- A person moving into the fox causes a gentle reset to the rear of the venue. There are no hearts or lives to lose. The message **NOW YOU'RE FEELING FUNNY IN A MOSHPIT** appears for three seconds before play resumes automatically.
+- The four on-stage band members retain the supplied concert composition and receive lightweight instrument, microphone, drum and lighting animations. The supplied pixel **THE NEW ROUTINES** logo now sits on the rear wall behind them. The stage uses soft amber, purple and teal sweeps rather than harsh strobing; the **LIGHTS** button can disable them.
+- The supplied Level 3 *Cutscene* clip starts after **START SHOW**, loops continuously during play, keeps playing through a moshpit reset, and fades naturally at the end. The **SOUND** button can mute it.
+- Reaching the tile beside the female fox pauses the crowd, shows **WHO DO YOU LOVE THAT YOU CAN'T SEE?** for three seconds, then presents the final message: **NOT LONG NOW — CUTSCENE OUT JANUARY 15TH 2027**. The final card stays onscreen until the player selects **LEVELS**.
 
 ## Files
 
 ```text
-index.html                         Level 1 + level-selection integration
-level2.html                        Standalone Level 2 maze
-level-01-environment.png           Original Level 1 background
-fox-sprite-sheet.png               Original Level 1 fox animation sheet
-bin-open.png                       Original Level 1 bin
-cutscene-video-game-sound.mp3      Original Level 1 music
-assets/level2/fox-topdown-v1.png   New top-down Level 2 fox
-assets/level2/frankie-combine-topdown-v1.png
-assets/level2/cutscene-level-2.mp3 Supplied Level 2 music clip
+index.html                                Original Level 1 + level-selection integration
+level2.html                               Standalone Level 2 maze (unchanged by Level 3)
+level3.html                               Standalone Level 3 concert-crowd level
+level-01-environment.png                  Original Level 1 background
+fox-sprite-sheet.png                      Original Level 1 fox animation sheet
+bin-open.png                              Original Level 1 bin
+cutscene-video-game-sound.mp3             Original Level 1 music
+assets/level2/                            Existing Level 2 files (unchanged by Level 3)
+assets/level3/concert-venue.png           Supplied concert venue artwork
+assets/level3/concert-mockup.png          Supplied final concert visual reference / title backdrop
+assets/level3/crowd-sprite-sheet.png      Supplied human crowd source artwork
+assets/level3/fox-sprite-sheet.png        Supplied male and female fox source artwork
+assets/level3/cutscene-level-3.mp3        Approved Level 3 Cutscene promotional clip
 ```
 
-## Pre-save link
-
-Open `level2.html` and edit the value at the top of its script:
-
-```js
-const PRESAVE_URL = '';
-```
-
-Paste the final pre-save URL between the quotes. Until then, the reward button safely says **LINK COMING SOON** and opens nothing.
+Level 3 removes the baked checkerboard from the supplied crowd and fox sheets in the browser, caches the resulting pixel sprites, and renders the venue in one canvas. This keeps the original source art untouched, avoids blurry scaling, and is lightweight enough for mobile browsers.
 
 ## Progress
 
@@ -49,8 +51,22 @@ The game stores completion locally in the browser:
 - `cutscene-level-one`
 - `cutscene-level-two`
 - `cutscene-level-two-presave-opened` (only once a real pre-save URL is set)
+- `cutscene-level-three`
 
-This keeps unlocked levels after refreshes and returning from a pre-save visit. To test as a completely new player, clear the website data for the GitHub Pages site in the browser.
+Progress is per browser/device. To test as a completely new player, clear the GitHub Pages site's website data in that browser.
+
+## Updating an existing Level 1 + 2 build with Level 3
+
+For the Level 3 release, add or replace only these items at the repository root:
+
+```text
+index.html
+level3.html
+README.md
+assets/level3/   (upload this new folder and its five files)
+```
+
+Do **not** delete or replace `level2.html`, any Level 1 files, `assets/level2/`, or the Level 1 and Level 2 music files.
 
 ## Local preview
 
@@ -60,24 +76,11 @@ From this folder, run:
 python3 -m http.server 4173
 ```
 
-Then open `http://localhost:4173/`. A local server is preferable to opening the files directly because browser audio rules are closer to GitHub Pages and Instagram's in-app browser.
-
-## Applying the Level 2 refinement update
-
-If the Field Maze version is already published, replace only these two files at the repository root:
-
-```text
-level2.html
-README.md
-```
-
-Keep `index.html`, all Level 1 files, the existing `assets/level2/` folder, the Level 2 music, and both Level 2 image files exactly as they are. The refinement update does not require any asset upload.
+Then open `http://localhost:4173/`. A local server is preferable to opening the files directly because browser audio behaviour is closer to GitHub Pages and Instagram's in-app browser.
 
 ## Deploy to GitHub Pages
 
-Upload the **contents of this folder** to the root of `thenewroutinesband/cutscene` on the `main` branch. Do not upload the enclosing folder or a ZIP file.
-
-The important difference from the previous rejected combined build is that this package begins from the approved Level 1 source. It restores the original Level 1 interface and adds Level 2 in `level2.html` rather than rebuilding Level 1.
+Upload the contents of this folder to the root of `thenewroutinesband/cutscene` on the `main` branch. Do not upload the enclosing folder or a ZIP file.
 
 After committing, GitHub Pages should publish from `main` / `(root)` at:
 

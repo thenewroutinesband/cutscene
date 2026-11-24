@@ -192,9 +192,9 @@
               <span>01</span><b>THE PETROL STATION</b><em id="levelOneState">PLAY</em>
             </button>
             <button class="level-card locked" id="playLevelTwo" type="button" disabled><span>02</span><b>THE STORM FIELD</b><em id="levelTwoState">LOCKED</em></button>
-            <button class="level-card locked" type="button" disabled><span>03</span><b>COLD ON THE OFFBEAT</b><em>LOCKED</em></button>
-            <button class="level-card locked" type="button" disabled><span>04</span><b>WHO DO YOU LOVE?</b><em>LOCKED</em></button>
-            <p class="level-note">COMPLETE EACH CUTSCENE TO UNLOCK THE NEXT.</p>
+            <button class="level-card locked" id="playLevelThree" type="button" disabled><span>03</span><b>WHO DO YOU LOVE?</b><em id="levelThreeState">LOCKED</em></button>
+            <button class="level-card locked" type="button" disabled><span>04</span><b>THIS SUCKER IS NUCLEAR!</b><em>LOCKED</em></button>
+            <p class="level-note">COMPLETE THE STORM FIELD TO ENTER THE CONCERT.</p>
           </div>
         </div>
       </section>
@@ -255,6 +255,8 @@
         const levelOneState = document.getElementById('levelOneState');
         const playLevelTwo = document.getElementById('playLevelTwo');
         const levelTwoState = document.getElementById('levelTwoState');
+        const playLevelThree = document.getElementById('playLevelThree');
+        const levelThreeState = document.getElementById('levelThreeState');
         const levelScreen = document.getElementById('levelScreen');
         const fox = document.getElementById('fox');
         const bin = document.getElementById('bin');
@@ -287,6 +289,7 @@
         let soundOn = true;
         let completed = false;
         let levelTwoCompleted = false;
+        let levelThreeCompleted = false;
         let audioCtx;
         let masterGain;
         let rainSource;
@@ -301,6 +304,7 @@
         try {
           completed = localStorage.getItem('cutscene-level-one') === 'complete';
           levelTwoCompleted = localStorage.getItem('cutscene-level-two') === 'complete';
+          levelThreeCompleted = localStorage.getItem('cutscene-level-three') === 'complete';
         } catch (_) {}
 
         function focusSoon(element) { window.setTimeout(() => element.focus(), 60); }
@@ -312,6 +316,10 @@
           playLevelTwo.classList.toggle('locked', !completed);
           playLevelTwo.classList.toggle('complete', levelTwoCompleted);
           levelTwoState.textContent = completed ? (levelTwoCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
+          playLevelThree.disabled = !levelTwoCompleted;
+          playLevelThree.classList.toggle('locked', !levelTwoCompleted);
+          playLevelThree.classList.toggle('complete', levelThreeCompleted);
+          levelThreeState.textContent = levelTwoCompleted ? (levelThreeCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
         }
 
         function showOpening() {
@@ -643,6 +651,7 @@
         });
         playLevelOne.addEventListener('click', startLevelOne);
         playLevelTwo.addEventListener('click', () => { if (completed) window.location.assign('level2.html'); });
+        playLevelThree.addEventListener('click', () => { if (levelTwoCompleted) window.location.assign('level3.html'); });
         start.addEventListener('click', startGame);
         action.addEventListener('click', scavenge);
         sound.addEventListener('click', () => setSound(!soundOn));
