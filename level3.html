@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#21042a" />
+    <meta name="description" content="Cut Scene — Level 3: Who Do You Love?" />
+    <title>Cut Scene — Level 3: Who Do You Love?</title>
+    <style>
+      :root {
+        --ink: #14011e;
+        --night: #26042e;
+        --plum: #511040;
+        --berry: #922765;
+        --amber: #ffad18;
+        --cream: #ffe5b8;
+        --teal: #00aaa0;
+        --deep-teal: #075d65;
+        --hud: rgba(35, 4, 43, .95);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { width: 100%; min-height: 100%; margin: 0; overflow: hidden; background: var(--ink); }
+      body {
+        color: var(--cream);
+        font-family: "Courier New", ui-monospace, monospace;
+        font-weight: 700;
+        letter-spacing: .075em;
+        -webkit-tap-highlight-color: transparent;
+      }
+      button { font: inherit; letter-spacing: inherit; }
+      button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+      [hidden] { display: none !important; }
+
+      .game-shell { min-height: 100dvh; position: relative; isolation: isolate; overflow: hidden; background: radial-gradient(circle at 50% -10%, #6c1b56 0, var(--night) 36%, var(--ink) 84%); }
+      .game-shell::after {
+        content: ""; position: fixed; inset: 0; z-index: 150; pointer-events: none; opacity: .13; mix-blend-mode: screen;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
+      }
+
+      .level-screen {
+        position: fixed; inset: 0; z-index: 20; display: grid; grid-template-columns: minmax(0, 720px); grid-template-rows: auto auto auto;
+        justify-content: center; justify-items: center; align-content: center; gap: 8px;
+        padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+      }
+
+      .game-meta { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "brand actions" "task task"; gap: 6px; align-items: stretch; }
+      .brand, .task, .dialogue-panel {
+        background: var(--hud); border: 2px solid #7b215c; box-shadow: 3px 3px 0 #120118; text-shadow: 2px 2px 0 #611447;
+      }
+      .brand { grid-area: brand; align-self: center; min-width: 0; padding: 7px 8px; color: var(--cream); font-size: clamp(8px, 1.7vw, 12px); line-height: 1.25; }
+      .meta-actions { grid-area: actions; display: flex; gap: 5px; align-items: stretch; }
+      .sound, .lights {
+        min-height: 32px; padding: 6px 8px; color: var(--cream); background: var(--hud); border: 3px solid var(--teal); box-shadow: 3px 3px 0 #120118; cursor: pointer; font-size: 9px;
+      }
+      .lights { border-color: var(--amber); }
+      .sound[aria-pressed="false"], .lights[aria-pressed="false"] { color: #c99bb7; border-color: #723057; }
+      .task { grid-area: task; min-width: 0; padding: 6px 8px; border-color: var(--amber); color: var(--cream); text-align: right; font-size: clamp(8px, 1.6vw, 11px); line-height: 1.25; }
+      .task::before { content: "OBJECTIVE"; display: block; margin-bottom: 3px; color: var(--teal); font-size: 8px; letter-spacing: .16em; }
+
+      .stage {
+        position: relative; width: var(--stage-width, min(100%, 560px)); aspect-ratio: 4 / 5; overflow: hidden; isolation: isolate;
+        background: #1a0324; box-shadow: 0 0 0 1px rgba(255,173,24,.22), 0 20px 60px rgba(0,0,0,.5);
+      }
+      #concertCanvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+      .stage::after { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; background: linear-gradient(180deg, rgba(20,2,29,.04), rgba(20,2,29,.18)); }
+      .stage.shake { animation: stage-shake .34s steps(3, end) 2; }
+      .mosh-message {
+        position: absolute; z-index: 8; left: 7%; right: 7%; bottom: 9%; padding: 10px 12px; color: var(--cream); background: rgba(54, 7, 54, .94);
+        border: 4px solid var(--amber); box-shadow: 5px 5px 0 #130119; text-align: center; font-size: clamp(10px, 2.2vw, 15px); line-height: 1.45; text-shadow: 3px 3px 0 #651742;
+        animation: mosh-pop .28s steps(3, end) both;
+      }
+
+      .lower-deck { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 9px; }
+      .dialogue-panel { min-height: 94px; display: grid; align-content: center; padding: 11px 12px; border-color: #7b215c; }
+      .dialogue-panel.mosh { border-color: var(--amber); animation: dialogue-bump .34s steps(3, end) 2; }
+      .dialogue-kicker { display: block; margin-bottom: 6px; color: var(--teal); font-size: 8px; }
+      .dialogue-copy { margin: 0; color: var(--cream); font-size: clamp(9px, 1.8vw, 12px); line-height: 1.5; }
+      .controls { display: grid; grid-template-columns: 132px; grid-template-rows: 132px auto; gap: 7px; justify-items: end; }
+      .dpad { width: 132px; height: 132px; display: grid; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); gap: 3px; }
+      .control, .menu-button { color: var(--cream); border: 0; cursor: pointer; user-select: none; -webkit-user-select: none; }
+      .control { width: 42px; height: 42px; background: #3d0a41; border: 3px solid #7b215c; box-shadow: inset 0 0 0 3px #25042d, 3px 3px 0 #130219; font-size: 18px; }
+      .control.up { grid-column: 2; grid-row: 1; }.control.left { grid-column: 1; grid-row: 2; }.control.right { grid-column: 3; grid-row: 2; }.control.down { grid-column: 2; grid-row: 3; }
+      .control.active, .control:active { background: #a12872; transform: translate(2px,2px); box-shadow: inset 0 0 0 3px #25042d; }
+      .menu-button { min-height: 37px; width: 132px; color: #2b0630; background: var(--amber); border: 4px solid #c66317; box-shadow: 4px 4px 0 #17021d; font-size: 9px; line-height: 1.1; }
+      .menu-button strong { display: block; margin-bottom: 3px; font-size: 11px; }
+
+      .intro, .final-screen {
+        position: fixed; z-index: 90; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; background: rgba(16,1,23,.7);
+      }
+      .intro::before {
+        content: ""; position: absolute; inset: 0; opacity: .24; background: url("assets/level3/concert-mockup.png") center / cover no-repeat; filter: saturate(.92) contrast(1.08); pointer-events: none;
+      }
+      .intro-card, .final-card { position: relative; z-index: 1; width: min(92vw, 510px); padding: 22px; background: rgba(38, 5, 47, .96); border: 5px solid var(--amber); box-shadow: 9px 9px 0 #120118; }
+      .intro-card::before, .final-card::before { content: "THE NEW ROUTINES"; display: block; margin-bottom: 15px; color: var(--teal); font-size: 10px; }
+      .intro h1, .final-card h1 { margin: 0 0 13px; color: var(--amber); font-size: clamp(28px, 7vw, 54px); line-height: .88; text-shadow: 4px 4px 0 #69184e; }
+      .intro p, .final-card p { margin: 0 0 17px; font-size: 12px; line-height: 1.7; }
+      .subline { color: var(--teal); font-size: 10px !important; }
+      .start-button { min-width: 156px; min-height: 53px; color: #2b0630; background: var(--amber); border: 4px solid #c66317; box-shadow: 4px 4px 0 #14021b; cursor: pointer; font: inherit; font-size: 13px; }
+      .start-button:disabled { opacity: .58; cursor: wait; }
+      .start-button:active, .menu-button:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 #14021b; }
+      .final-screen { z-index: 120; background: linear-gradient(rgba(24,2,32,.72), rgba(24,2,32,.92)), url("assets/level3/concert-mockup.png") center / cover no-repeat; }
+      .final-card { overflow: hidden; }
+      .final-card::after { content: ""; position: absolute; left: -12%; right: -12%; bottom: 0; height: 18%; opacity: .4; background: repeating-linear-gradient(90deg, transparent 0 10%, rgba(255,173,24,.9) 10% 17%, transparent 17% 31%); transform: perspective(220px) rotateX(60deg); transform-origin: bottom; }
+      .final-card > * { position: relative; z-index: 1; }
+      .final-card h1 { font-size: clamp(29px, 7vw, 52px); }
+      .release-copy { color: var(--cream); font-size: clamp(14px, 3vw, 21px) !important; line-height: 1.45 !important; }
+
+      @keyframes stage-shake { 0%,100% { transform: translate(0); } 25% { transform: translate(-6px, 3px); } 50% { transform: translate(6px, -3px); } 75% { transform: translate(-3px, 4px); } }
+      @keyframes mosh-pop { from { opacity: 0; transform: scale(.76) rotate(-2deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+      @keyframes dialogue-bump { 50% { transform: translateY(-3px) scale(1.015); } }
+
+      @media (max-width: 480px) {
+        .level-screen { gap: 6px; padding: 6px; }
+        .game-meta { gap: 4px; }
+        .brand, .task { padding: 5px 6px; font-size: 8px; }
+        .task::before { margin-bottom: 2px; font-size: 7px; }
+        .sound, .lights { min-height: 28px; padding: 5px 6px; font-size: 8px; }
+        .lower-deck { gap: 7px; }
+        .dialogue-panel { min-height: 87px; padding: 8px 9px; }
+        .dialogue-kicker { margin-bottom: 4px; font-size: 7px; }
+        .dialogue-copy { font-size: 8px; }
+        .controls { grid-template-columns: 120px; grid-template-rows: 120px auto; gap: 5px; }
+        .dpad { width: 120px; height: 120px; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); gap: 3px; }
+        .control { width: 38px; height: 38px; border-width: 3px; font-size: 16px; }
+        .menu-button { width: 120px; min-height: 34px; border-width: 3px; font-size: 8px; }
+        .menu-button strong { font-size: 10px; }
+        .intro-card, .final-card { padding: 20px 16px; }
+      }
+      @media (max-height: 650px) and (min-width: 520px) {
+        .dialogue-panel { min-height: 72px; padding: 7px 10px; }
+        .controls { grid-template-columns: 110px; grid-template-rows: 110px auto; }
+        .dpad { width: 110px; height: 110px; grid-template-columns: repeat(3, 35px); grid-template-rows: repeat(3, 35px); }
+        .control { width: 35px; height: 35px; font-size: 15px; }
+        .menu-button { width: 110px; min-height: 31px; }
+      }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
+    </style>
+  </head>
+  <body>
+    <main class="game-shell" aria-label="Cut Scene Level 3: Who Do You Love?">
+      <section class="level-screen" aria-label="Concert crowd level">
+        <div class="game-meta" aria-live="polite">
+          <div class="brand">THE NEW ROUTINES</div>
+          <div class="meta-actions">
+            <button class="sound" id="sound" type="button" aria-pressed="true" aria-label="Turn sound off">SOUND: ON</button>
+            <button class="lights" id="lights" type="button" aria-pressed="true" aria-label="Turn stage lighting off">LIGHTS: ON</button>
+          </div>
+          <div class="task" id="task">FIND HER AT THE BARRIER</div>
+        </div>
+
+        <div class="stage" id="stage">
+          <canvas id="concertCanvas" width="900" height="1125" aria-label="A pixel-art concert venue with a crowd, a fox, and The New Routines on stage"></canvas>
+          <div class="mosh-message" id="moshMessage" aria-live="assertive" hidden>NOW YOU'RE FEELING<br />FUNNY IN A MOSHPIT</div>
+        </div>
+
+        <div class="lower-deck">
+          <section class="dialogue-panel" id="dialoguePanel" aria-live="polite" aria-atomic="true">
+            <span class="dialogue-kicker">CUTSCENE // 03</span>
+            <p class="dialogue-copy" id="dialogue">THERE SHE IS!<br />FIND YOUR WAY THROUGH THE CROWD.</p>
+          </section>
+          <div class="controls" aria-label="Level three controls">
+            <div class="dpad" aria-label="Movement controls">
+              <button class="control up" data-direction="up" type="button" aria-label="Move toward the stage">▲</button>
+              <button class="control left" data-direction="left" type="button" aria-label="Move left">◀</button>
+              <button class="control right" data-direction="right" type="button" aria-label="Move right">▶</button>
+              <button class="control down" data-direction="down" type="button" aria-label="Move toward the entrance">▼</button>
+            </div>
+            <button class="menu-button" id="returnLevels" type="button"><strong>MENU</strong>LEVELS</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="intro" id="intro" aria-label="Level three instructions">
+        <div class="intro-card">
+          <h1>WHO DO<br />YOU LOVE?</h1>
+          <p>THERE SHE IS!<br />FIND YOUR WAY THROUGH THE CROWD.</p>
+          <p class="subline">ARROWS / WASD / FOUR-WAY D-PAD</p>
+          <button class="start-button" id="startRun" type="button" disabled>LOADING VENUE...</button>
+        </div>
+      </section>
+
+      <section class="final-screen" id="finalScreen" aria-label="Level three completion" hidden>
+        <div class="final-card">
+          <h1>NOT LONG<br />NOW</h1>
+          <p class="release-copy">CUTSCENE OUT<br />JANUARY 15TH 2027</p>
+          <button class="start-button" id="finalLevels" type="button">LEVELS</button>
+        </div>
+      </section>
+    </main>
+
+    <audio id="music" preload="auto" loop src="assets/level3/cutscene-level-3.mp3"></audio>
+
+    <script>
+      (() => {
+        const unlocked = (() => {
+          try { return localStorage.getItem('cutscene-level-two') === 'complete'; } catch (_) { return false; }
+        })();
+        if (!unlocked) { window.location.replace('index.html#levels'); return; }
+
+        const stage = document.getElementById('stage');
+        const canvas = document.getElementById('concertCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        const intro = document.getElementById('intro');
+        const finalScreen = document.getElementById('finalScreen');
+        const startRun = document.getElementById('startRun');
+        const finalLevels = document.getElementById('finalLevels');
+        const returnLevels = document.getElementById('returnLevels');
+        const dialogue = document.getElementById('dialogue');
+        const dialoguePanel = document.getElementById('dialoguePanel');
+        const moshMessage = document.getElementById('moshMessage');
+        const soundButton = document.getElementById('sound');
+        const lightsButton = document.getElementById('lights');
+        const music = document.getElementById('music');
+        const task = document.getElementById('task');
+        const dpadButtons = [...document.querySelectorAll('[data-direction]')];
+
+        const W = canvas.width;
+        const H = canvas.height;
+        const COLS = 11;
+        const START = { x: 5, y: 9 };
+        const GOAL = { x: 5, y: 1 };
+        // The audience begins below the full-height stage barrier. Keeping the
+        // grid in this lower band prevents people from reading as stage props.
+        const AUDIENCE_TOP = 570;
+        const ROW_PITCH = 49;
+        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const stationaryRows = {
+          1: [0, 1, 3, 4, 6, 7, 9, 10],
+          3: [0, 2, 3, 5, 6, 8, 9, 10],
+          5: [0, 1, 3, 5, 6, 8, 10],
+          7: [1, 2, 4, 5, 7, 8, 10]
+        };
+        const movingRows = [
+          { row: 2, direction: 1, speed: .52, bases: [0, 3, 6, 9] },
+          { row: 4, direction: -1, speed: .46, bases: [1, 4, 7, 10] },
+          { row: 6, direction: 1, speed: .42, bases: [0, 3, 6, 9] },
+          { row: 8, direction: -1, speed: .38, bases: [1, 4, 7, 10] }
+        ];
+        const movingByRow = Object.fromEntries(movingRows.map(row => [row.row, row]));
+        const ambience = { soundOn: true, lightsOn: !reducedMotion };
+
+        let venueImage;
+        let concertMockupImage;
+        let crowdSheet;
+        let foxSheet;
+        let crowdSprites = [];
+        let foxSprites = {};
+        let assetsReady = false;
+        let sceneState = 'intro';
+        let gameTime = 0;
+        let lastFrame = 0;
+        let inputReadyAt = 0;
+        let collisionGraceUntil = 0;
+        let frameHandle;
+        let player = { ...START, facing: 'up' };
+        let hop = { from: { ...START }, to: { ...START }, startedAt: 0, duration: 0 };
+        let musicFade;
+
+        // Native looping is supported in the GitHub Pages target browsers.
+        // This explicit setting also preserves looping if markup is altered by
+        // an in-app browser's media handling.
+        music.loop = true;
+
+        function fitStage() {
+          const reserved = window.innerWidth <= 480 ? 248 : 270;
+          const usableHeight = Math.max(320, window.innerHeight - reserved);
+          const width = Math.min(window.innerWidth - 16, 720, usableHeight * .8);
+          stage.style.setProperty('--stage-width', `${Math.max(280, Math.floor(width))}px`);
+        }
+
+        function setDialogue(copy, mosh = false) {
+          dialogue.innerHTML = copy;
+          dialoguePanel.classList.toggle('mosh', mosh);
+        }
+
+        function loadImage(src) {
+          return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = () => reject(new Error(`Could not load ${src}`));
+            image.src = src;
+          });
+        }
+
+        function makeCanvas(width, height) {
+          const surface = document.createElement('canvas');
+          surface.width = Math.max(1, width);
+          surface.height = Math.max(1, height);
+          return surface;
+        }
+
+        function isCheckerboardPixel(r, g, b) {
+          const spread = Math.max(r, g, b) - Math.min(r, g, b);
+          const brightness = (r + g + b) / 3;
+          return spread < 17 && brightness > 204;
+        }
+
+        function extractSprite(source, sx, sy, sw, sh) {
+          const temp = makeCanvas(Math.ceil(sw), Math.ceil(sh));
+          const tctx = temp.getContext('2d', { willReadFrequently: true });
+          tctx.imageSmoothingEnabled = false;
+          tctx.drawImage(source, sx, sy, sw, sh, 0, 0, temp.width, temp.height);
+          const pixels = tctx.getImageData(0, 0, temp.width, temp.height);
+          const data = pixels.data;
+          let minX = temp.width, minY = temp.height, maxX = -1, maxY = -1;
+          for (let y = 0; y < temp.height; y += 1) {
+            for (let x = 0; x < temp.width; x += 1) {
+              const at = (y * temp.width + x) * 4;
+              if (isCheckerboardPixel(data[at], data[at + 1], data[at + 2])) data[at + 3] = 0;
+              if (data[at + 3] > 24) {
+                minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+              }
+            }
+          }
+          tctx.putImageData(pixels, 0, 0);
+          if (maxX < minX || maxY < minY) return temp;
+          const pad = 4;
+          const out = makeCanvas(maxX - minX + 1 + pad * 2, maxY - minY + 1 + pad * 2);
+          out.getContext('2d').drawImage(temp, minX, minY, maxX - minX + 1, maxY - minY + 1, pad, pad, maxX - minX + 1, maxY - minY + 1);
+          return out;
+        }
+
+        function prepareSprites() {
+          const crowdX = [0, 307, 614, 922, 1229, 1536];
+          const crowdY = [0, 341, 683, 1024];
+          crowdSprites = [];
+          for (let row = 0; row < 3; row += 1) {
+            for (let col = 0; col < 5; col += 1) {
+              crowdSprites.push(extractSprite(crowdSheet, crowdX[col], crowdY[row], crowdX[col + 1] - crowdX[col], crowdY[row + 1] - crowdY[row]));
+            }
+          }
+          const cellW = 192;
+          const cellH = 256;
+          const foxCell = (col, row) => extractSprite(foxSheet, col * cellW, row * cellH, cellW, cellH);
+          foxSprites = {
+            down: [0, 1, 2, 3].map(col => foxCell(col, 0)),
+            up: [0, 1, 2, 3].map(col => foxCell(col, 1)),
+            side: [0, 1, 2, 3].map(col => foxCell(col, 2)),
+            female: foxCell(4, 1),
+            femaleHappy: foxCell(4, 2)
+          };
+        }
+
+        function project(column, row) {
+          const t = row / 9;
+          const width = 468 + (t * 350);
+          const x = (W / 2) + (column - ((COLS - 1) / 2)) * (width / (COLS - 1)) + ((9 - row) * 4);
+          const y = AUDIENCE_TOP + (row * ROW_PITCH);
+          return { x, y, scale: .64 + t * .42 };
+        }
+
+        function movingPositions(config) {
+          const span = COLS + 2;
+          return config.bases.map((base, index) => {
+            const raw = base + config.direction * config.speed * gameTime;
+            const x = ((raw + 1) % span + span) % span - 1;
+            return { x, index };
+          });
+        }
+
+        function rowHasPerson(row, column) {
+          if (stationaryRows[row]) return stationaryRows[row].includes(column);
+          const config = movingByRow[row];
+          return config ? movingPositions(config).some(person => Math.abs(person.x - column) < .43) : false;
+        }
+
+        function currentPlayerPosition(now) {
+          if (!hop.duration) return { x: player.x, y: player.y, jump: 0 };
+          const progress = Math.min(1, Math.max(0, (now - hop.startedAt) / hop.duration));
+          const ease = 1 - Math.pow(1 - progress, 3);
+          const x = hop.from.x + (hop.to.x - hop.from.x) * ease;
+          const y = hop.from.y + (hop.to.y - hop.from.y) * ease;
+          const jump = Math.sin(progress * Math.PI) * 17;
+          if (progress >= 1) hop.duration = 0;
+          return { x, y, jump };
+        }
+
+        function drawImageAt(image, footX, footY, width, lift = 0, flip = false, alpha = 1) {
+          if (!image) return;
+          const height = width * (image.height / image.width);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.translate(footX, footY - lift);
+          if (flip) ctx.scale(-1, 1);
+          ctx.drawImage(image, -width / 2, -height, width, height);
+          ctx.restore();
+        }
+
+        function drawBackdrop(time) {
+          ctx.fillStyle = '#21042b';
+          ctx.fillRect(0, 0, W, H);
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(venueImage, 0, 0, W, W);
+
+          const floor = ctx.createLinearGradient(0, 860, 0, H);
+          floor.addColorStop(0, 'rgba(57,10,68,.82)');
+          floor.addColorStop(1, '#180221');
+          ctx.fillStyle = floor;
+          ctx.fillRect(0, 830, W, H - 830);
+          for (let y = 848; y < H; y += 56) {
+            ctx.fillStyle = y % 112 === 8 ? 'rgba(169,44,117,.14)' : 'rgba(9,1,16,.22)';
+            ctx.fillRect(0, y, W, 22);
+          }
+
+          ctx.fillStyle = 'rgba(5,1,12,.2)';
+          ctx.fillRect(0, 0, W, H);
+          if (!ambience.lightsOn || reducedMotion) return;
+          drawLightCones(time);
+        }
+
+        function drawBandLogo() {
+          if (!concertMockupImage) return;
+          // This crop comes from the supplied concert mock-up, preserving the
+          // approved pixel wordmark rather than approximating it with a font.
+          const source = { x: 590, y: 128, width: 390, height: 150 };
+          const scale = W / concertMockupImage.width;
+          ctx.save();
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(
+            concertMockupImage,
+            source.x, source.y, source.width, source.height,
+            source.x * scale, source.y * scale, source.width * scale, source.height * scale
+          );
+          ctx.restore();
+        }
+
+        function drawLightCones(time) {
+          const sources = [.395, .525, .70, .85];
+          const hues = ['255,173,24', '198,64,206', '0,170,160', '255,173,24'];
+          sources.forEach((source, index) => {
+            const beam = Math.sin(time * (1.15 + index * .12) + index * 1.8) * (72 + index * 7);
+            const x = source * W;
+            const endX = x + beam;
+            const grad = ctx.createLinearGradient(x, 150, endX, 605);
+            grad.addColorStop(0, `rgba(${hues[index]},.29)`);
+            grad.addColorStop(1, `rgba(${hues[index]},0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(x - 10, 150);
+            ctx.lineTo(x + 10, 150);
+            ctx.lineTo(endX + 97, 620);
+            ctx.lineTo(endX - 97, 620);
+            ctx.closePath();
+            ctx.fill();
+          });
+          ctx.fillStyle = `rgba(255,229,184,${.12 + Math.sin(time * 2.1) * .045})`;
+          ctx.fillRect(0, 394, W, 7);
+        }
+
+        function drawBandAnimation(time) {
+          const phase = reducedMotion ? 0 : time;
+          const pulse = .48 + Math.sin(phase * 4.2) * .22;
+          ctx.save();
+          ctx.globalCompositeOperation = 'screen';
+          // Sasha / Dylan: small moving guitar-strum glints over the exact baked-in figures.
+          [[.372, .365, 1], [.774, .383, -1]].forEach(([x, y, sign], index) => {
+            const px = x * W;
+            const py = y * W;
+            ctx.strokeStyle = `rgba(255,173,24,${.52 + Math.sin(phase * 7 + index) * .2})`;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(px - 22, py + Math.sin(phase * 7 + index) * 5);
+            ctx.lineTo(px + 27, py + sign * 11 + Math.sin(phase * 7 + index) * 5);
+            ctx.stroke();
+          });
+          // Eoin: drum stick/cymbal flashes.
+          const drummerX = .64 * W;
+          const drummerY = .294 * W;
+          ctx.strokeStyle = `rgba(255,229,184,${.55 + Math.sin(phase * 9) * .25})`;
+          ctx.lineWidth = 3;
+          [-1, 1].forEach(sign => {
+            const lift = Math.sin(phase * 9 + sign) * 17;
+            ctx.beginPath();
+            ctx.moveTo(drummerX + sign * 8, drummerY + 34);
+            ctx.lineTo(drummerX + sign * 32, drummerY - lift);
+            ctx.stroke();
+          });
+          ctx.fillStyle = `rgba(255,173,24,${pulse})`;
+          ctx.fillRect(drummerX - 58, drummerY + 30, 26, 3);
+          ctx.fillRect(drummerX + 34, drummerY + 30, 26, 3);
+          // Stan: microphone / vocal pixels and bass highlight.
+          const stanX = .548 * W;
+          const stanY = .420 * W;
+          ctx.strokeStyle = `rgba(0,170,160,${.45 + Math.sin(phase * 5.2) * .2})`;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(stanX - 9, stanY - 38, 10 + Math.sin(phase * 5.2) * 2, -.7, .7);
+          ctx.stroke();
+          ctx.fillStyle = `rgba(255,173,24,${pulse})`;
+          ctx.fillRect(stanX + 11, stanY + 15, 38, 3);
+          ctx.restore();
+        }
+
+        function drawFloorHints() {
+          for (let row = 1; row <= 9; row += 1) {
+            const left = project(0, row);
+            const right = project(COLS - 1, row);
+            ctx.strokeStyle = 'rgba(209,78,151,.08)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(left.x - 42, left.y + 7);
+            ctx.lineTo(right.x + 42, right.y + 7);
+            ctx.stroke();
+          }
+        }
+
+        function crowdPeople(time) {
+          const people = [];
+          Object.entries(stationaryRows).forEach(([rowKey, cols]) => {
+            const row = Number(rowKey);
+            cols.forEach((column, index) => people.push({ row, column, index, moving: false, seed: row * 17 + index }));
+          });
+          movingRows.forEach(config => {
+            movingPositions(config).forEach(person => {
+              if (person.x > -.7 && person.x < COLS - .3) people.push({ row: config.row, column: person.x, index: person.index, moving: true, seed: config.row * 19 + person.index });
+            });
+          });
+          return people.sort((a, b) => project(a.column, a.row).y - project(b.column, b.row).y);
+        }
+
+        function drawCrowd(time, people) {
+          people.forEach(person => {
+            const point = project(person.column, person.row);
+            const sprite = crowdSprites[person.seed % crowdSprites.length];
+            const bob = reducedMotion ? 0 : Math.sin(time * (2.6 + (person.seed % 3) * .17) + person.seed) * (1.8 + point.scale);
+            const width = 35 + point.scale * 29;
+            drawImageAt(sprite, point.x, point.y, width, bob, person.seed % 2 === 0);
+          });
+        }
+
+        function drawFemale(time, happy = false) {
+          const goal = project(GOAL.x, 0);
+          const bob = reducedMotion ? 0 : Math.sin(time * 2.4) * 3;
+          drawImageAt(happy ? foxSprites.femaleHappy : foxSprites.female, goal.x, goal.y + 3, 70, bob, false);
+          const glow = .45 + (reducedMotion ? 0 : Math.sin(time * 4.4) * .25);
+          ctx.fillStyle = `rgba(255,173,24,${glow})`;
+          for (let i = -1; i <= 1; i += 1) {
+            const x = goal.x + i * 19;
+            ctx.fillRect(x - 3, goal.y - 93 - Math.abs(i) * 7, 6, 15);
+            ctx.fillRect(x - 6, goal.y - 89 - Math.abs(i) * 7, 12, 5);
+          }
+        }
+
+        function choosePlayerSprite(now) {
+          const frame = Math.floor(now / 120) % 4;
+          if (player.facing === 'down') return { image: foxSprites.down[frame], flip: false };
+          if (player.facing === 'left') return { image: foxSprites.side[frame], flip: true };
+          if (player.facing === 'right') return { image: foxSprites.side[frame], flip: false };
+          return { image: foxSprites.up[frame], flip: false };
+        }
+
+        function drawHeart(x, y, time) {
+          const hop = reducedMotion ? 0 : Math.sin(time * 4.5) * 4;
+          ctx.fillStyle = '#ff6eaa';
+          ctx.fillRect(x - 12, y - hop, 24, 18);
+          ctx.fillRect(x - 6, y - 6 - hop, 12, 30);
+          ctx.fillStyle = '#ffe5b8';
+          ctx.fillRect(x - 5, y - 2 - hop, 5, 5);
+        }
+
+        function drawPlayer(now, time, visual) {
+          const point = project(visual.x, visual.y);
+          const { image, flip } = choosePlayerSprite(now);
+          drawImageAt(image, point.x, point.y, 74 * point.scale, visual.jump, flip);
+          if (sceneState === 'reunion') drawHeart(point.x + 42, point.y - 83, time);
+        }
+
+        function render(now) {
+          if (!assetsReady) return;
+          const time = gameTime;
+          const playerVisual = currentPlayerPosition(now);
+          const playerPoint = project(playerVisual.x, playerVisual.y);
+          const people = crowdPeople(time);
+          const firstForegroundPerson = people.findIndex(person => project(person.column, person.row).y > playerPoint.y + 1);
+          const backgroundCrowd = firstForegroundPerson === -1 ? people : people.slice(0, firstForegroundPerson);
+          const foregroundCrowd = firstForegroundPerson === -1 ? [] : people.slice(firstForegroundPerson);
+          drawBackdrop(time);
+          drawBandLogo();
+          drawBandAnimation(time);
+          drawFloorHints();
+          drawFemale(time, sceneState === 'reunion');
+          drawCrowd(time, backgroundCrowd);
+          drawPlayer(now, time, playerVisual);
+          drawCrowd(time, foregroundCrowd);
+          const shade = ctx.createLinearGradient(0, 0, 0, H);
+          shade.addColorStop(0, 'rgba(16,1,23,.02)');
+          shade.addColorStop(1, 'rgba(16,1,23,.22)');
+          ctx.fillStyle = shade;
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        function frame(now) {
+          if (!lastFrame) lastFrame = now;
+          const delta = Math.min(.05, (now - lastFrame) / 1000);
+          lastFrame = now;
+          if (sceneState === 'running') {
+            gameTime += delta;
+            checkMovingCollisions();
+          }
+          render(now);
+          frameHandle = requestAnimationFrame(frame);
+        }
+
+        function checkMovingCollisions() {
+          if (gameTime < collisionGraceUntil || sceneState !== 'running') return;
+          const config = movingByRow[player.y];
+          if (!config) return;
+          if (movingPositions(config).some(person => Math.abs(person.x - player.x) < .38)) triggerMoshpit();
+        }
+
+        function triggerMoshpit() {
+          if (sceneState !== 'running') return;
+          sceneState = 'knocked';
+          player = { ...START, facing: 'up' };
+          hop = { from: { ...START }, to: { ...START }, startedAt: 0, duration: 0 };
+          task.textContent = 'TAKE A BREATH — THEN TRY AGAIN';
+          setDialogue("NOW YOU'RE FEELING<br />FUNNY IN A MOSHPIT", true);
+          stage.classList.add('shake');
+          moshMessage.hidden = false;
+          window.setTimeout(() => {
+            stage.classList.remove('shake');
+            moshMessage.hidden = true;
+            dialoguePanel.classList.remove('mosh');
+            task.textContent = 'FIND HER AT THE BARRIER';
+            setDialogue('THERE SHE IS!<br />FIND YOUR WAY THROUGH THE CROWD.');
+            collisionGraceUntil = gameTime + 1.15;
+            sceneState = 'running';
+          }, 3000);
+        }
+
+        function beginReunion() {
+          if (sceneState !== 'running') return;
+          sceneState = 'reunion';
+          task.textContent = 'FOUND HER';
+          setDialogue("WHO DO YOU LOVE<br />THAT YOU CAN'T SEE?");
+          try { localStorage.setItem('cutscene-level-three', 'complete'); } catch (_) {}
+          window.setTimeout(() => {
+            sceneState = 'final';
+            fadeMusic();
+            finalScreen.hidden = false;
+          }, 3000);
+        }
+
+        function attemptMove(dx, dy, facing) {
+          const now = performance.now();
+          if (sceneState !== 'running' || now < inputReadyAt || hop.duration) return;
+          const target = { x: player.x + dx, y: player.y + dy };
+          player.facing = facing;
+          inputReadyAt = now + 145;
+          if (target.x < 0 || target.x >= COLS || target.y < 1 || target.y > 9) {
+            setDialogue('THE STAGE IS JUST AHEAD.<br />FIND A GAP IN THE CROWD.');
+            return;
+          }
+          if (rowHasPerson(target.y, target.x)) {
+            setDialogue('CROWD BLOCKED —<br />WAIT FOR A GAP.');
+            return;
+          }
+          const from = { x: player.x, y: player.y };
+          player.x = target.x;
+          player.y = target.y;
+          hop = { from, to: { ...target }, startedAt: now, duration: 170 };
+          setDialogue('KEEP MOVING.<br />SHE IS AT THE BARRIER.');
+          if (player.x === GOAL.x && player.y === GOAL.y) window.setTimeout(beginReunion, 175);
+        }
+
+        function directionMove(direction) {
+          const map = {
+            up: [0, -1, 'up'], down: [0, 1, 'down'], left: [-1, 0, 'left'], right: [1, 0, 'right']
+          };
+          const [dx, dy, facing] = map[direction];
+          attemptMove(dx, dy, facing);
+        }
+
+        function setSound(enabled) {
+          ambience.soundOn = enabled;
+          soundButton.setAttribute('aria-pressed', String(enabled));
+          soundButton.textContent = `SOUND: ${enabled ? 'ON' : 'OFF'}`;
+          if (!enabled) music.pause();
+          else if (sceneState === 'running' || sceneState === 'reunion') music.play().catch(() => {});
+        }
+
+        function setLights(enabled) {
+          ambience.lightsOn = enabled && !reducedMotion;
+          lightsButton.setAttribute('aria-pressed', String(ambience.lightsOn));
+          lightsButton.textContent = `LIGHTS: ${ambience.lightsOn ? 'ON' : 'OFF'}`;
+        }
+
+        function fadeMusic() {
+          window.clearInterval(musicFade);
+          if (!ambience.soundOn) return;
+          const startingVolume = music.volume;
+          const steps = 18;
+          let step = 0;
+          musicFade = window.setInterval(() => {
+            step += 1;
+            music.volume = Math.max(0, startingVolume * (1 - step / steps));
+            if (step >= steps) {
+              window.clearInterval(musicFade);
+              music.pause();
+              music.currentTime = 0;
+              music.volume = .68;
+            }
+          }, 70);
+        }
+
+        function returnToLevels() {
+          window.clearInterval(musicFade);
+          music.pause();
+          music.currentTime = 0;
+          window.location.assign('index.html#levels');
+        }
+
+        function startLevel() {
+          if (!assetsReady) return;
+          intro.hidden = true;
+          finalScreen.hidden = true;
+          sceneState = 'running';
+          gameTime = 0;
+          player = { ...START, facing: 'up' };
+          hop = { from: { ...START }, to: { ...START }, startedAt: 0, duration: 0 };
+          collisionGraceUntil = 1.15;
+          task.textContent = 'FIND HER AT THE BARRIER';
+          setDialogue('THERE SHE IS!<br />FIND YOUR WAY THROUGH THE CROWD.');
+          if (ambience.soundOn) {
+            music.volume = .68;
+            music.currentTime = 0;
+            music.play().catch(() => setDialogue('TAP SOUND TO START THE MUSIC.<br />FIND YOUR WAY THROUGH THE CROWD.'));
+          }
+        }
+
+        dpadButtons.forEach(button => {
+          const direction = button.dataset.direction;
+          button.addEventListener('pointerdown', event => {
+            event.preventDefault();
+            button.classList.add('active');
+            directionMove(direction);
+          });
+          ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => button.addEventListener(type, () => button.classList.remove('active')));
+        });
+        window.addEventListener('keydown', event => {
+          const keyMap = { ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down', ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right' };
+          if (!keyMap[event.key]) return;
+          event.preventDefault();
+          directionMove(keyMap[event.key]);
+        });
+        soundButton.addEventListener('click', () => setSound(!ambience.soundOn));
+        lightsButton.addEventListener('click', () => setLights(!ambience.lightsOn));
+        startRun.addEventListener('click', startLevel);
+        returnLevels.addEventListener('click', returnToLevels);
+        finalLevels.addEventListener('click', returnToLevels);
+        window.addEventListener('resize', fitStage, { passive: true });
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && ambience.soundOn) music.pause();
+          else if (!document.hidden && ambience.soundOn && (sceneState === 'running' || sceneState === 'reunion')) music.play().catch(() => {});
+        });
+        music.addEventListener('ended', () => {
+          if (ambience.soundOn && (sceneState === 'running' || sceneState === 'reunion')) {
+            music.currentTime = 0;
+            music.play().catch(() => {});
+          }
+        });
+
+        (async () => {
+          try {
+            [venueImage, concertMockupImage, crowdSheet, foxSheet] = await Promise.all([
+              loadImage('assets/level3/concert-venue.png'),
+              loadImage('assets/level3/concert-mockup.png'),
+              loadImage('assets/level3/crowd-sprite-sheet.png'),
+              loadImage('assets/level3/fox-sprite-sheet.png')
+            ]);
+            prepareSprites();
+            assetsReady = true;
+            startRun.disabled = false;
+            startRun.textContent = 'START SHOW';
+            fitStage();
+            frameHandle = requestAnimationFrame(frame);
+          } catch (error) {
+            startRun.textContent = 'ASSET ERROR';
+            setDialogue('THE CONCERT ASSETS COULD NOT LOAD.');
+            console.error(error);
+          }
+        })();
+        fitStage();
+      })();
+    </script>
+  </body>
+</html>
