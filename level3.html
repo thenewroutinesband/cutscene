@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#21042a" />
-    <meta name="description" content="Cut Scene — Level 3: Who Do You Love?" />
-    <title>Cut Scene — Level 3: Who Do You Love?</title>
+    <meta name="description" content="Cut Scene — Level 3: The Mosh Pit." />
+    <title>Cut Scene — Level 3: The Mosh Pit</title>
     <style>
       :root {
         --ink: #14011e;
@@ -138,7 +138,7 @@
     </style>
   </head>
   <body>
-    <main class="game-shell" aria-label="Cut Scene Level 3: Who Do You Love?">
+    <main class="game-shell" aria-label="Cut Scene Level 3: The Mosh Pit">
       <section class="level-screen" aria-label="Concert crowd level">
         <div class="game-meta" aria-live="polite">
           <div class="brand">THE NEW ROUTINES</div>
@@ -166,14 +166,14 @@
               <button class="control right" data-direction="right" type="button" aria-label="Move right">▶</button>
               <button class="control down" data-direction="down" type="button" aria-label="Move toward the entrance">▼</button>
             </div>
-            <button class="menu-button" id="returnLevels" type="button"><strong>MENU</strong>LEVELS</button>
+            <button class="menu-button" id="returnLevels" type="button"><strong>LEVEL</strong>RETURN</button>
           </div>
         </div>
       </section>
 
       <section class="intro" id="intro" aria-label="Level three instructions">
         <div class="intro-card">
-          <h1>WHO DO<br />YOU LOVE?</h1>
+          <h1>THE MOSH<br />PIT</h1>
           <p>THERE SHE IS!<br />FIND YOUR WAY THROUGH THE CROWD.</p>
           <p class="subline">ARROWS / WASD / FOUR-WAY D-PAD</p>
           <button class="start-button" id="startRun" type="button" disabled>LOADING VENUE...</button>
@@ -184,7 +184,7 @@
         <div class="final-card">
           <h1>NOT LONG<br />NOW</h1>
           <p class="release-copy">CUTSCENE OUT<br />JANUARY 15TH 2027</p>
-          <button class="start-button" id="finalLevels" type="button">LEVELS</button>
+          <button class="start-button" id="finalLevels" type="button">LEVEL RETURN</button>
         </div>
       </section>
     </main>
@@ -193,6 +193,9 @@
 
     <script>
       (() => {
+        const LEVEL_THREE_RELEASED = false;
+        if (!LEVEL_THREE_RELEASED) { window.location.replace('index.html#levels'); return; }
+
         const unlocked = (() => {
           try { return localStorage.getItem('cutscene-level-two') === 'complete'; } catch (_) { return false; }
         })();
@@ -241,7 +244,6 @@
         const ambience = { soundOn: true, lightsOn: !reducedMotion };
 
         let venueImage;
-        let concertMockupImage;
         let crowdSheet;
         let foxSheet;
         let crowdSprites = [];
@@ -409,22 +411,6 @@
           drawLightCones(time);
         }
 
-        function drawBandLogo() {
-          if (!concertMockupImage) return;
-          // This crop comes from the supplied concert mock-up, preserving the
-          // approved pixel wordmark rather than approximating it with a font.
-          const source = { x: 590, y: 128, width: 390, height: 150 };
-          const scale = W / concertMockupImage.width;
-          ctx.save();
-          ctx.imageSmoothingEnabled = false;
-          ctx.drawImage(
-            concertMockupImage,
-            source.x, source.y, source.width, source.height,
-            source.x * scale, source.y * scale, source.width * scale, source.height * scale
-          );
-          ctx.restore();
-        }
-
         function drawLightCones(time) {
           const sources = [.395, .525, .70, .85];
           const hues = ['255,173,24', '198,64,206', '0,170,160', '255,173,24'];
@@ -576,7 +562,6 @@
           const backgroundCrowd = firstForegroundPerson === -1 ? people : people.slice(0, firstForegroundPerson);
           const foregroundCrowd = firstForegroundPerson === -1 ? [] : people.slice(firstForegroundPerson);
           drawBackdrop(time);
-          drawBandLogo();
           drawBandAnimation(time);
           drawFloorHints();
           drawFemale(time, sceneState === 'reunion');
@@ -763,9 +748,8 @@
 
         (async () => {
           try {
-            [venueImage, concertMockupImage, crowdSheet, foxSheet] = await Promise.all([
+            [venueImage, crowdSheet, foxSheet] = await Promise.all([
               loadImage('assets/level3/concert-venue.png'),
-              loadImage('assets/level3/concert-mockup.png'),
               loadImage('assets/level3/crowd-sprite-sheet.png'),
               loadImage('assets/level3/fox-sprite-sheet.png')
             ]);

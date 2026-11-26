@@ -99,18 +99,18 @@
       .bin.rummaging { animation: bin-rummage .42s steps(2,end) 9; filter: drop-shadow(5px 6px 0 #16021c) drop-shadow(0 0 17px rgba(0,170,160,.92)); }
       .crumbs { position:absolute; z-index:29; left:80%; bottom:39%; opacity:0; width:12px; height:12px; background:var(--cream); box-shadow: 14px -11px var(--amber), -11px -19px var(--teal), 27px -24px var(--cream); }
       .crumbs.show { animation: crumbs .55s steps(3,end) 6; }
-      .prompt { position:absolute; z-index:38; left:50%; top:17%; min-width:max-content; padding:10px 14px; color:var(--cream); background:#2b0734; border:4px solid var(--amber); box-shadow:6px 6px 0 #15021c; font-size:clamp(10px,2.1vw,16px); transform:translateX(-50%) translateY(-10px); opacity:0; pointer-events:none; transition:opacity .18s,transform .18s; }
+      .prompt { position:absolute; z-index:65; left:50%; top:34%; min-width:0; max-width:calc(100% - 32px); padding:10px 14px; color:var(--cream); background:#2b0734; border:4px solid var(--amber); box-shadow:6px 6px 0 #15021c; font-size:clamp(10px,2.1vw,16px); text-align:center; transform:translateX(-50%) translateY(-10px); opacity:0; pointer-events:none; transition:opacity .18s,transform .18s; }
       .prompt.show { transform:translateX(-50%) translateY(0); opacity:1; }
       .prompt::after { content:""; position:absolute; left:50%; bottom:-12px; width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent; border-top:10px solid var(--amber); transform:translateX(-50%); }
 
-      .hud { position:absolute; z-index:40; inset:0; pointer-events:none; padding:16px; }
+      .hud { position:absolute; z-index:40; inset:0; pointer-events:none; padding:max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
       .brand, .task { position:absolute; padding:7px 9px; color:var(--cream); background:var(--hud); border:2px solid #7b215c; box-shadow:3px 3px 0 #16021c; font-size:clamp(9px,1.8vw,13px); line-height:1.25; text-shadow:2px 2px 0 #611447; }
-      .brand { top:16px; left:16px; min-width:142px; }
-      .task { top:16px; right:16px; max-width:53%; color:var(--cream); border-color:var(--amber); text-align:right; font-size:clamp(10px,1.9vw,15px); }
+      .brand { top:max(16px, env(safe-area-inset-top)); left:max(16px, env(safe-area-inset-left)); min-width:142px; }
+      .task { top:max(16px, env(safe-area-inset-top)); right:max(16px, env(safe-area-inset-right)); max-width:calc(100% - 180px); color:var(--cream); border-color:var(--amber); text-align:right; font-size:clamp(10px,1.9vw,15px); }
       .task::before { content:"OBJECTIVE"; display:block; margin-bottom:4px; color:var(--teal); font-size:8px; letter-spacing:.16em; }
-      .sound { position:fixed; z-index:60; top:58px; left:max(16px, env(safe-area-inset-left)); min-height:31px; padding:6px 9px; color:var(--cream); background:var(--hud); border:3px solid var(--teal); box-shadow:3px 3px 0 #16021c; cursor:pointer; font-size:10px; }
+      .sound { position:fixed; z-index:60; top:calc(max(16px, env(safe-area-inset-top)) + 54px); left:max(16px, env(safe-area-inset-left)); min-height:31px; padding:6px 9px; color:var(--cream); background:var(--hud); border:3px solid var(--teal); box-shadow:3px 3px 0 #16021c; cursor:pointer; font-size:10px; }
       .sound[aria-pressed="false"] { color:#cf9db9; border-color:#7a315f; }
-      .health { position:fixed; z-index:62; left:max(16px, env(safe-area-inset-left)); top:101px; min-width:148px; padding:7px 8px; background:var(--hud); border:3px solid #7b215c; box-shadow:4px 4px 0 #16021c; transform-origin:center; transition:left .46s cubic-bezier(.22,.85,.23,1.12), top .46s cubic-bezier(.22,.85,.23,1.12), transform .46s cubic-bezier(.22,.85,.23,1.12), border-color .2s, box-shadow .2s; }
+      .health { position:fixed; z-index:62; left:max(16px, env(safe-area-inset-left)); top:calc(max(16px, env(safe-area-inset-top)) + 112px); min-width:148px; padding:7px 8px; background:var(--hud); border:3px solid #7b215c; box-shadow:4px 4px 0 #16021c; transform-origin:center; transition:left .46s cubic-bezier(.22,.85,.23,1.12), top .46s cubic-bezier(.22,.85,.23,1.12), transform .46s cubic-bezier(.22,.85,.23,1.12), border-color .2s, box-shadow .2s; }
       .health-label { display:block; margin-bottom:5px; color:var(--teal); font-size:9px; letter-spacing:.14em; }
       .hearts { display:flex; gap:4px; }
       .heart { width:18px; height:17px; display:block; background:#4a1645; clip-path:polygon(0 24%,18% 24%,18% 0,41% 0,41% 18%,59% 18%,59% 0,82% 0,82% 24%,100% 24%,100% 59%,82% 59%,82% 76%,59% 76%,59% 100%,41% 100%,41% 76%,18% 76%,18% 59%,0 59%); box-shadow:inset -3px -3px #28072f; }
@@ -123,12 +123,16 @@
 
       .controls { position:fixed; z-index:70; left:max(14px, env(safe-area-inset-left)); right:max(14px, env(safe-area-inset-right)); bottom:max(16px, env(safe-area-inset-bottom)); display:flex; align-items:end; justify-content:space-between; }
       .dpad { position:relative; width:148px; height:72px; }
+      .control-actions { display:grid; justify-items:end; gap:8px; }
       .control, .action { min-height:54px; color:var(--cream); border:0; cursor:pointer; user-select:none; -webkit-user-select:none; }
       .control { position:absolute; top:12px; width:54px; height:54px; background:#3d0a41; border:4px solid #7b215c; box-shadow:inset 0 0 0 3px #25042d,3px 3px 0 #130219; font-size:22px; }
       .control.left { left:0; }.control.right { right:0; }.control.center { left:47px; pointer-events:none; background:#551146; }
       .control.active, .control:active { background:#a12872; transform:translate(2px,2px); box-shadow:inset 0 0 0 3px #25042d; }
       .action { min-width:116px; min-height:70px; padding:10px 14px; color:#2b0630; background:var(--amber); border:5px solid #c66317; box-shadow:5px 5px 0 #17021d; font-size:12px; line-height:1.1; }
       .action strong { display:block; margin-bottom:5px; font-size:17px; }.action[disabled] { opacity:.38; cursor:not-allowed; filter:grayscale(.7); }.action.pulse:not([disabled]) { animation: action-pulse .75s steps(2,end) infinite; }
+      .level-return { min-width:116px; min-height:42px; padding:7px 10px; color:var(--cream); background:var(--hud); border:3px solid #7b215c; box-shadow:3px 3px 0 #16021c; cursor:pointer; font:inherit; font-size:9px; line-height:1.1; }
+      .level-return strong { display:block; margin-bottom:3px; color:var(--teal); font-size:10px; }
+      .level-return:active { transform:translate(2px,2px); box-shadow:1px 1px 0 #16021c; }
 
       .intro { position:fixed; z-index:90; inset:0; display:grid; place-items:center; padding:24px; background:rgba(20,2,27,.52); transition:opacity .32s, visibility .32s; }
       .intro.hidden { opacity:0; visibility:hidden; }
@@ -162,7 +166,7 @@
         .controls { left:calc(50% - min(50vw, 50dvh) + 16px); right:calc(50% - min(50vw, 50dvh) + 16px); }
       }
       @media (max-width: 480px) {
-        .master-screen { padding:16px; }.opening-card { padding:22px 16px 18px; }.level-bottom{padding:9px;gap:7px}.level-card{min-height:86px;padding:9px}.level-card b{font-size:10px}.level-card span{font-size:10px}.level-card em{font-size:9px}.health.reward{transform:translate(-50%,-50%) scale(1.62)}.task{max-width:51%;font-size:10px}.brand{min-width:126px;font-size:9px}.sound{top:57px}.health{top:98px}.dpad{transform:scale(.9);transform-origin:bottom left}.action{transform:scale(.9);transform-origin:bottom right}.action.pulse:not([disabled]){animation-name:none;transform:scale(.9)}
+        .master-screen { padding:16px; }.opening-card { padding:22px 16px 18px; }.level-bottom{padding:9px;gap:7px}.level-card{min-height:86px;padding:9px}.level-card b{font-size:10px}.level-card span{font-size:10px}.level-card em{font-size:9px}.health.reward{transform:translate(-50%,-50%) scale(1.62)}.task{top:max(14px, env(safe-area-inset-top));right:max(14px, env(safe-area-inset-right));max-width:calc(100% - 162px);font-size:10px}.brand{top:max(14px, env(safe-area-inset-top));left:max(14px, env(safe-area-inset-left));min-width:126px;font-size:9px}.sound{top:calc(max(14px, env(safe-area-inset-top)) + 58px);left:max(14px, env(safe-area-inset-left))}.health{top:calc(max(14px, env(safe-area-inset-top)) + 120px);left:max(14px, env(safe-area-inset-left))}.prompt{top:53%;max-width:calc(100% - 28px);font-size:10px}.dpad{transform:scale(.9);transform-origin:bottom left}.action{transform:scale(.9);transform-origin:bottom right}.action.pulse:not([disabled]){animation-name:none;transform:scale(.9)}.control-actions{gap:5px}.level-return{min-width:105px;min-height:38px;padding:6px 8px;font-size:8px}.level-return strong{font-size:9px}
       }
       @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.001ms !important; transition-duration:.001ms !important; } }
     </style>
@@ -172,7 +176,7 @@
       <section class="master-screen opening" id="opening" aria-label="Opening choice">
         <div class="opening-road" aria-hidden="true"></div>
         <div class="panel opening-card">
-          <h1>KEEP<br />DRIVING?</h1>
+          <h1>READY<br />PLAY?</h1>
           <div class="drive-choices">
             <button class="drive-choice" id="driveNo" type="button">NO</button>
             <button class="drive-choice primary" id="driveYes" type="button">YES</button>
@@ -191,10 +195,10 @@
             <button class="level-card" id="playLevelOne" type="button">
               <span>01</span><b>THE PETROL STATION</b><em id="levelOneState">PLAY</em>
             </button>
-            <button class="level-card locked" id="playLevelTwo" type="button" disabled><span>02</span><b>THE STORM FIELD</b><em id="levelTwoState">LOCKED</em></button>
-            <button class="level-card locked" id="playLevelThree" type="button" disabled><span>03</span><b>WHO DO YOU LOVE?</b><em id="levelThreeState">LOCKED</em></button>
+            <button class="level-card locked" id="playLevelTwo" type="button" disabled><span>02</span><b>THE FIELD</b><em id="levelTwoState">LOCKED</em></button>
+            <button class="level-card locked" id="playLevelThree" type="button" disabled><span>03</span><b>THE MOSH PIT</b><em id="levelThreeState">LOCKED</em></button>
             <button class="level-card locked" type="button" disabled><span>04</span><b>THIS SUCKER IS NUCLEAR!</b><em>LOCKED</em></button>
-            <p class="level-note">COMPLETE THE STORM FIELD TO ENTER THE CONCERT.</p>
+            <p class="level-note">MORE LEVELS COMING SOON.</p>
           </div>
         </div>
       </section>
@@ -225,11 +229,14 @@
             <button class="control center" type="button" tabindex="-1" aria-hidden="true">+</button>
             <button class="control right" data-direction="right" type="button" aria-label="Move right">▶</button>
           </div>
-          <button class="action" id="action" type="button" disabled aria-label="Scavenge in the bin"><strong>A</strong>SCAVENGE</button>
+          <div class="control-actions">
+            <button class="action" id="action" type="button" disabled aria-label="Scavenge in the bin"><strong>A</strong>SCAVENGE</button>
+            <button class="level-return" id="returnLevels" type="button" aria-label="Return to the level selection"><strong>LEVEL</strong>RETURN</button>
+          </div>
         </div>
         <section class="intro" id="intro" aria-label="Game instructions">
           <div class="panel intro-card">
-            <h1>CUT SCENE</h1>
+            <h1>THE PETROL<br />STATION</h1>
             <p>MOVE WITH THE ARROW KEYS<br />OR THE D-PAD. FIND SOMETHING TO EAT.</p>
             <button class="menu-button primary" id="start" type="button">PLAY</button>
           </div>
@@ -264,6 +271,7 @@
         const task = document.getElementById('task');
         const controls = document.getElementById('controls');
         const action = document.getElementById('action');
+        const returnLevels = document.getElementById('returnLevels');
         const intro = document.getElementById('intro');
         const start = document.getElementById('start');
         const continueButton = document.getElementById('continue');
@@ -299,7 +307,11 @@
         let musicRequested = false;
         let nativeMusicActive = false;
         let resumeOnReturn = false;
+        let rummageTimerIds = [];
         const useNativeMusic = location.protocol === 'file:';
+        // Future levels are released by date, rather than by completing another level.
+        const LEVEL_TWO_RELEASED = false;
+        const LEVEL_THREE_RELEASED = false;
 
         try {
           completed = localStorage.getItem('cutscene-level-one') === 'complete';
@@ -312,14 +324,14 @@
         function updateLevelCard() {
           playLevelOne.classList.toggle('complete', completed);
           levelOneState.textContent = completed ? 'COMPLETE / REPLAY' : 'PLAY';
-          playLevelTwo.disabled = !completed;
-          playLevelTwo.classList.toggle('locked', !completed);
-          playLevelTwo.classList.toggle('complete', levelTwoCompleted);
-          levelTwoState.textContent = completed ? (levelTwoCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
-          playLevelThree.disabled = !levelTwoCompleted;
-          playLevelThree.classList.toggle('locked', !levelTwoCompleted);
-          playLevelThree.classList.toggle('complete', levelThreeCompleted);
-          levelThreeState.textContent = levelTwoCompleted ? (levelThreeCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
+          playLevelTwo.disabled = !LEVEL_TWO_RELEASED;
+          playLevelTwo.classList.toggle('locked', !LEVEL_TWO_RELEASED);
+          playLevelTwo.classList.toggle('complete', LEVEL_TWO_RELEASED && levelTwoCompleted);
+          levelTwoState.textContent = LEVEL_TWO_RELEASED ? (levelTwoCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
+          playLevelThree.disabled = !LEVEL_THREE_RELEASED;
+          playLevelThree.classList.toggle('locked', !LEVEL_THREE_RELEASED);
+          playLevelThree.classList.toggle('complete', LEVEL_THREE_RELEASED && levelThreeCompleted);
+          levelThreeState.textContent = LEVEL_THREE_RELEASED ? (levelThreeCompleted ? 'COMPLETE / REPLAY' : 'PLAY') : 'LOCKED';
         }
 
         function showOpening() {
@@ -341,7 +353,13 @@
           focusSoon(playLevelOne);
         }
 
+        function clearRummageTimers() {
+          rummageTimerIds.forEach(timerId => window.clearTimeout(timerId));
+          rummageTimerIds = [];
+        }
+
         function resetLevelOne() {
+          clearRummageTimers();
           foxX = 13;
           playing = false;
           direction = 0;
@@ -373,6 +391,26 @@
           controls.hidden = true;
           intro.classList.remove('hidden');
           focusSoon(start);
+        }
+
+        function returnToLevels() {
+          if (activeScreen !== 'level-one') return;
+          clearRummageTimers();
+          playing = false;
+          direction = 0;
+          rummaging = false;
+          resumeOnReturn = false;
+          controls.hidden = true;
+          intro.classList.add('hidden');
+          stopWebMusic();
+          stopNativeMusic();
+          musicRequested = false;
+          if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+          if (animationFrame) {
+            cancelAnimationFrame(animationFrame);
+            animationFrame = undefined;
+          }
+          showLevelSelect();
         }
 
         function completeLevel() {
@@ -440,6 +478,7 @@
 
         function scavenge() {
           if (!canScavenge || rummaging) return;
+          clearRummageTimers();
           rummaging = true;
           direction = 0;
           task.textContent = 'EATING...';
@@ -453,17 +492,17 @@
           crumbs.classList.add('show');
           health.classList.add('reward');
           rewardBackdrop.classList.add('show');
-          [0, 350, 760, 1180, 1620, 2070, 2510, 2970].forEach(delay => window.setTimeout(rustle, delay));
-          [510, 1030, 1550, 2070].forEach((delay, index) => window.setTimeout(() => setHealth(index + 2, true), delay));
-          window.setTimeout(() => { health.classList.remove('reward'); rewardBackdrop.classList.remove('show'); }, 2780);
-          window.setTimeout(() => {
+          [0, 350, 760, 1180, 1620, 2070, 2510, 2970].forEach(delay => rummageTimerIds.push(window.setTimeout(rustle, delay)));
+          [510, 1030, 1550, 2070].forEach((delay, index) => rummageTimerIds.push(window.setTimeout(() => setHealth(index + 2, true), delay)));
+          rummageTimerIds.push(window.setTimeout(() => { health.classList.remove('reward'); rewardBackdrop.classList.remove('show'); }, 2780));
+          rummageTimerIds.push(window.setTimeout(() => {
             fox.classList.remove('rummaging');
             bin.classList.remove('rummaging');
             crumbs.classList.remove('show');
             task.textContent = 'FOUND SOMETHING';
             continueButton.classList.add('show');
             continueButton.setAttribute('aria-hidden', 'false');
-          }, 3400);
+          }, 3400));
         }
 
         function setupAudio() {
@@ -650,10 +689,11 @@
           window.setTimeout(() => { opening.classList.remove('driving'); driveStatus.textContent = ''; driveNo.disabled = false; driveYes.disabled = false; driveNo.focus(); }, 1650);
         });
         playLevelOne.addEventListener('click', startLevelOne);
-        playLevelTwo.addEventListener('click', () => { if (completed) window.location.assign('level2.html'); });
-        playLevelThree.addEventListener('click', () => { if (levelTwoCompleted) window.location.assign('level3.html'); });
+        playLevelTwo.addEventListener('click', () => { if (LEVEL_TWO_RELEASED) window.location.assign('level2.html'); });
+        playLevelThree.addEventListener('click', () => { if (LEVEL_THREE_RELEASED) window.location.assign('level3.html'); });
         start.addEventListener('click', startGame);
         action.addEventListener('click', scavenge);
+        returnLevels.addEventListener('click', returnToLevels);
         sound.addEventListener('click', () => setSound(!soundOn));
         continueButton.addEventListener('click', () => {
           completeLevel();

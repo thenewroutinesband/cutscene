@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#21042a" />
-    <meta name="description" content="Cut Scene — Level 2: The Storm Field." />
-    <title>Cut Scene — Level 2: The Storm Field</title>
+    <meta name="description" content="Cut Scene — Level 2: The Field." />
+    <title>Cut Scene — Level 2: The Field</title>
     <style>
       :root {
         --ink: #18021f;
@@ -136,8 +136,8 @@
     </style>
   </head>
   <body>
-    <main class="game-shell" aria-label="Cut Scene Level 2: The Storm Field">
-      <section class="level-screen" id="levelScreen" aria-label="Level 2: The Storm Field">
+    <main class="game-shell" aria-label="Cut Scene Level 2: The Field">
+      <section class="level-screen" id="levelScreen" aria-label="Level 2: The Field">
         <div class="game-meta" aria-live="polite">
           <div class="brand">THE NEW ROUTINES</div>
           <button class="sound" id="sound" type="button" aria-pressed="true" aria-label="Turn sound off">SOUND: ON</button>
@@ -165,14 +165,14 @@
             <button class="control right" data-direction="right" type="button" aria-label="Move right">▶</button>
             <button class="control down" data-direction="down" type="button" aria-label="Move down">▼</button>
           </div>
-          <button class="action" id="returnLevels" type="button"><strong>MENU</strong>LEVELS</button>
+          <button class="action" id="returnLevels" type="button"><strong>LEVEL</strong>RETURN</button>
         </div>
       </section>
 
       <section class="intro" id="intro" aria-label="Level two instructions">
         <div class="intro-card">
-          <h1>THE STORM<br />FIELD</h1>
-          <p>MAKE IT ACROSS THE STORM FIELD TO THE SHELTER.<br />KEEP MOVING — FRANKIE WILL FOLLOW.</p>
+          <h1>THE FIELD</h1>
+          <p>MAKE IT ACROSS THE FIELD TO THE SHELTER.<br />KEEP MOVING — FRANKIE WILL FOLLOW.</p>
           <p class="subline">ARROWS / WASD / FOUR-WAY D-PAD</p>
           <button class="menu-button" id="startRun" type="button">START RUN</button>
         </div>
@@ -208,7 +208,7 @@
           <p>FRANKIE GOT YOU THERE.</p>
           <button class="presave" id="presave" type="button">PRE-SAVE HERE<small>LINK COMING SOON</small></button>
           <p class="reward-status" id="rewardStatus" aria-live="polite"></p>
-          <button class="back-link" id="backToLevels" type="button">RETURN TO LEVELS</button>
+          <button class="back-link" id="backToLevels" type="button">LEVEL RETURN</button>
         </div>
       </section>
     </main>
@@ -217,6 +217,9 @@
 
     <script>
       (() => {
+        const LEVEL_TWO_RELEASED = false;
+        if (!LEVEL_TWO_RELEASED) { window.location.replace('index.html#levels'); return; }
+
         const PRESAVE_URL = '';
         const LEVEL_ONE_KEY = 'cutscene-level-one';
         const LEVEL_TWO_KEY = 'cutscene-level-two';
@@ -645,7 +648,7 @@
           startMusic();
         }
         function startNumberCountdown() {
-          const copy = 'MAKE IT ACROSS THE STORM FIELD<br />TO THE SHELTER';
+          const copy = 'MAKE IT ACROSS THE FIELD<br />TO THE SHELTER';
           showCountdown(copy, '3');
           setTimer(() => showCountdown(copy, '2'), 1000);
           setTimer(() => showCountdown(copy, '1'), 2000);
@@ -658,7 +661,7 @@
           setRain(false);
           phase = 'countdown';
           if (showInstruction) {
-            showCountdown('MAKE IT ACROSS THE STORM FIELD<br />TO THE SHELTER', 'GET READY', true);
+            showCountdown('MAKE IT ACROSS THE FIELD<br />TO THE SHELTER', 'GET READY', true);
             setTimer(startNumberCountdown, 3000);
           } else {
             startNumberCountdown();

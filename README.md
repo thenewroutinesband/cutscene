@@ -4,25 +4,33 @@ This is the GitHub Pages build for The New Routines' *Cut Scene*.
 
 ## What remains unchanged
 
-Level 1, Level 2, their visual design, their gameplay, their existing sound files, and their existing asset folders are preserved. Level 3 is a separate page and its files live only in `assets/level3/`.
+Gameplay, artwork, sound files and existing asset folders are preserved. This update changes labels, Level 1 HUD spacing, return-to-levels controls, and the Level 3 on-stage wordmark only. Level 3 remains a separate page and its files live only in `assets/level3/`.
 
 ## Level flow
 
 1. **01 / THE PETROL STATION** is the original approved level.
-2. **02 / THE STORM FIELD** unlocks after Level 1.
-3. **03 / WHO DO YOU LOVE?** unlocks after Level 2 and opens `level3.html`.
-4. **04 / THIS SUCKER IS NUCLEAR!** remains locked. It is not unlocked by completing Level 3, because future levels will be released on their own calendar schedule.
+2. **02 / THE FIELD** is locked for now.
+3. **03 / THE MOSH PIT** is locked for now.
+4. **04 / THIS SUCKER IS NUCLEAR!** is locked for now.
 
-## Level 3 — Who Do You Love?
+Levels 2–4 will be released on their own calendar dates. Their gameplay, artwork, music and saved progress are unchanged; only access to them is currently locked. Direct visits to `level2.html` and `level3.html` return players to the level menu while those levels are locked.
+
+## Level 3 — The Mosh Pit
 
 - A portrait-first, faux-isometric concert venue where the fox travels from the rear of a packed crowd to the female fox at the stage barrier.
 - The venue keeps the established dark purple, magenta, amber and teal *Cut Scene* look. The final concert reference informs the stage, audience density, lighting and four-member band layout.
 - Eight fair crowd rows alternate between stationary people and slow moving people. The crowd has generous gaps and multiple routes so the level remains approachable on a phone.
 - Arrow keys, WASD and the four-way D-pad move the fox one grid space at a time. Higher rows sit further back in the concert perspective, while the controls remain intuitive: up is towards the stage.
 - A person moving into the fox causes a gentle reset to the rear of the venue. There are no hearts or lives to lose. The message **NOW YOU'RE FEELING FUNNY IN A MOSHPIT** appears for three seconds before play resumes automatically.
-- The four on-stage band members retain the supplied concert composition and receive lightweight instrument, microphone, drum and lighting animations. The supplied pixel **THE NEW ROUTINES** logo now sits on the rear wall behind them. The stage uses soft amber, purple and teal sweeps rather than harsh strobing; the **LIGHTS** button can disable them.
+- The four on-stage band members retain the supplied concert composition and receive lightweight instrument, microphone, drum and lighting animations. The playable stage has no rear-wall wordmark above the band. The stage uses soft amber, purple and teal sweeps rather than harsh strobing; the **LIGHTS** button can disable them.
 - The supplied Level 3 *Cutscene* clip starts after **START SHOW**, loops continuously during play, keeps playing through a moshpit reset, and fades naturally at the end. The **SOUND** button can mute it.
 - Reaching the tile beside the female fox pauses the crowd, shows **WHO DO YOU LOVE THAT YOU CAN'T SEE?** for three seconds, then presents the final message: **NOT LONG NOW — CUTSCENE OUT JANUARY 15TH 2027**. The final card stays onscreen until the player selects **LEVELS**.
+
+## Interface updates
+
+- The opening prompt reads **READY PLAY?** and Level 1 introduces itself as **THE PETROL STATION**.
+- Level 1’s mobile HUD uses more vertical spacing, and the **BIN FOUND — PRESS A** notice appears below the health panel rather than behind it.
+- Levels 1–3 each have a visible **LEVEL RETURN** control during play. Level 4 has no page yet, so it remains unchanged.
 
 ## Files
 
@@ -55,18 +63,18 @@ The game stores completion locally in the browser:
 
 Progress is per browser/device. To test as a completely new player, clear the GitHub Pages site's website data in that browser.
 
-## Updating an existing Level 1 + 2 build with Level 3
+## Temporary level-lock update
 
-For the Level 3 release, add or replace only these items at the repository root:
+To apply the temporary release state, replace only these items at the repository root:
 
 ```text
 index.html
+level2.html
 level3.html
 README.md
-assets/level3/   (upload this new folder and its five files)
 ```
 
-Do **not** delete or replace `level2.html`, any Level 1 files, `assets/level2/`, or the Level 1 and Level 2 music files.
+Do **not** delete or replace any artwork, audio, `assets/level2/`, `assets/level3/`, or Level 1 files.
 
 ## Local preview
 
